@@ -17,6 +17,7 @@ import CreateComplaint from "../pages/citizen/createComplaint";
 import AssignedComplaints from "../pages/officer/AssignedComplaints";
 import OfficerComplaintDetails from "../pages/officer/ComplaintDetails";
 import Departments from "../pages/admin/Departments";
+import Officers from "../pages/admin/Officers";
 
 function AppRoutes() {
   return (
@@ -115,6 +116,15 @@ function AppRoutes() {
         element={
           <ProtectedRoute allowedRoles={["admin"]}>
             <Departments />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/admin/officers"
+        element={
+          <ProtectedRoute allowedRoles={["admin"]}>
+            <Officers />
           </ProtectedRoute>
         }
       />
