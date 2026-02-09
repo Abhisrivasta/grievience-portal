@@ -1,26 +1,30 @@
-import { useAuth } from "../../context/AuthContext";
+import { useAuth } from "../../contexts/AuthContext";
+import LogoutButton from "../common/LogoutButton";
+import NotificationBell from "../common/NotificationBell";
 
-export default function Navbar() {
-  const { user, logout } = useAuth();
+function Navbar() {
+  const { user } = useAuth();
 
   return (
-    <div className="h-14 bg-white shadow flex items-center justify-between px-6">
-      <h1 className="font-bold text-lg">
-        Civic Grievance Portal
-      </h1>
+    <header
+      style={{
+        height: "60px",
+        borderBottom: "1px solid #ddd",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "space-between",
+        padding: "0 16px",
+      }}
+    >
+      <h3>Grievance Portal</h3>
 
-      <div className="flex items-center gap-4">
-        <span className="text-sm text-gray-600">
-          {user?.name} ({user?.role})
-        </span>
-
-        <button
-          onClick={logout}
-          className="text-sm text-red-600 hover:underline"
-        >
-          Logout
-        </button>
+      <div style={{ display: "flex", gap: "12px" }}>
+        <NotificationBell />
+        <span>{user?.name}</span>
+        <LogoutButton />
       </div>
-    </div>
+    </header>
   );
 }
+
+export default Navbar;

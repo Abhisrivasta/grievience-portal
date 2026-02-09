@@ -1,165 +1,107 @@
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
-import PageWrapper from "../../components/layout/PageWrapper";
-import { getComplaintDetails } from "../../services/complaintService";
-import ComplaintTimeline from "../../components/timeline/ComplaintTimeline";
-import { submitFeedback } from "../../services/complaintService";
+import MainLayout from "../../components/layout/MainLayout";
+import { getComplaintById } from "../../api/complaint.api";
+import FeedbackForm from "../../components/common/FeedbackForm";
 
-export default function ComplaintDetails() {
+function ComplaintDetails() {
   const { id } = useParams();
   const [complaint, setComplaint] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [rating, setRating] = useState("");
-  const [comment, setComment] = useState("");
-  const [submitted, setSubmitted] = useState(false);
+  const [error, setError] = useState("");
 
   useEffect(() => {
-    getComplaintDetails(id)
-      .then((res) => {
+    const fetchComplaint = async () => {
+      try {
+        const res = await getComplaintById(id);
         setComplaint(res.data);
-      })
-      .catch(() => {
-        alert("Failed to load complaint details");
-      })
-      .finally(() => setLoading(false));
+      } catch (err) {
+        setError(err.response?.data?.message || "Failed to load complaint");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchComplaint();
   }, [id]);
 
   if (loading) {
     return (
-      <PageWrapper>
-        <p>Loading...</p>
-      </PageWrapper>
+      <MainLayout>
+        <p>Loading complaint...</p>
+      </MainLayout>
     );
   }
 
-  if (!complaint) {
+  if (error) {
     return (
-      <PageWrapper>
-        <p>Complaint not found.</p>
-      </PageWrapper>
+      <MainLayout>
+        <p style={{ color: "red" }}>{error}</p>
+      </MainLayout>
     );
   }
-
-    const handleFeedbackSubmit = async (e) => {
-    e.preventDefault();
-
-    try {
-      await submitFeedback({
-        complaintId: id,
-        rating,
-        comment,
-      });
-      setSubmitted(true);
-    } catch (err) {
-      alert(
-        err.response?.data?.message ||
-          "Failed to submit feedback"
-      );
-    }
-  };
-
 
   return (
-    <PageWrapper>
-      <h2 className="text-xl font-bold mb-4">Complaint Details</h2>
+    <MainLayout>
+      <h2>{complaint.title}</h2>
 
+      <p>
+        <strong>Description:</strong> {complaint.description}
+      </p>
+      <p>
+        <strong>Category:</strong> {complaint.category}
+      </p>
+      <p>
+        <strong>Status:</strong> {complaint.status}
+      </p>
+      <p>
+        <strong>Priority:</strong> {complaint.priority}
+      </p>
 
-          {complaint.status === "Resolved" && (
-        <div className="mt-6 bg-white p-4 rounded shadow">
-          <h3 className="font-semibold mb-4">
-            Submit Feedback
-          </h3>
-
-          {submitted ? (
-            <p className="text-green-600">
-              Feedback submitted successfully 🙏
-            </p>
-          ) : (
-            <form
-              onSubmit={handleFeedbackSubmit}
-              className="space-y-4"
-            >
-              <div>
-                <label className="block mb-1">
-                  Rating
-                </label>
-                <select
-                  required
-                  value={rating}
-                  onChange={(e) =>
-                    setRating(e.target.value)
-                  }
-                  className="border px-3 py-2 rounded w-32"
-                >
-                  <option value="">
-                    Select
-                  </option>
-                  <option value="1">1</option>
-                  <option value="2">2</option>
-                  <option value="3">3</option>
-                  <option value="4">4</option>
-                  <option value="5">5</option>
-                </select>
-              </div>
-
-              <div>
-                <label className="block mb-1">
-                  Comment
-                </label>
-                <textarea
-                  value={comment}
-                  onChange={(e) =>
-                    setComment(e.target.value)
-                  }
-                  className="border px-3 py-2 rounded w-full"
-                />
-              </div>
-
-              <button
-                type="submit"
-                className="bg-green-600 text-white px-4 py-2 rounded"
-              >
-                Submit Feedback
-              </button>
-            </form>
-          )}
-        </div>
+      {complaint.department && (
+        <p>
+          <strong>Department:</strong> {complaint.department.name}
+        </p>
       )}
 
-      
-      <div className="bg-white p-4 rounded shadow mb-6">
+      {complaint.assignedOfficer && (
         <p>
-          <strong>Title:</strong> {complaint.title}
+          <strong>Officer:</strong> {complaint.assignedOfficer.name}
         </p>
-        <p>
-          <strong>Category:</strong> {complaint.category}
-        </p>
-        <p>
-          <strong>Priority:</strong> {complaint.priority}
-        </p>
-        <p>
-          <strong>Status:</strong> {complaint.status}
-        </p>
-        <p>
-          <strong>Description:</strong> {complaint.description}
-        </p>
-      </div>
+      )}
 
-      {/* Timeline */}
-      <div className="bg-white p-4 rounded shadow">
-        <h3 className="font-semibold mb-4">Complaint Timeline</h3>
-        <ComplaintTimeline timeline={complaint.timeline} />
-      </div>
+      <hr />
 
-      {/* Feedback placeholder */}
+      <h3>Complaint Timeline</h3>
       {complaint.status === "Resolved" && (
-        <div className="mt-6 p-4 bg-green-50 border rounded">
-          <p className="font-semibold">Complaint resolved 🎉</p>
-          <p className="text-sm text-gray-600">
-            Feedback form will appear here.
-          </p>
-        </div>
+        <FeedbackForm
+          complaintId={complaint._id}
+          onSubmitted={() => alert("Feedback submitted successfully")}
+        />
       )}
-    </PageWrapper>
+
+      {complaint.timeline.length === 0 && <p>No timeline updates.</p>}
+
+      {complaint.timeline.map((t, index) => (
+        <div
+          key={index}
+          style={{
+            borderLeft: "3px solid #1976d2",
+            paddingLeft: "10px",
+            marginBottom: "10px",
+          }}
+        >
+          <p>
+            <strong>Status:</strong> {t.status}
+          </p>
+          {t.remark && <p>{t.remark}</p>}
+          <small>
+            Updated by {t.updatedBy} on {new Date(t.date).toLocaleString()}
+          </small>
+        </div>
+      ))}
+    </MainLayout>
   );
 }
+
+export default ComplaintDetails;
