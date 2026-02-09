@@ -21,3 +21,12 @@ export const getAssignedComplaints = async () => {
   const res = await api.get("/complaints/assigned");
   return res.data;
 };
+
+
+export const updateComplaintStatus = async (id, data) => {
+  const res = await api.put(
+    `/complaints/${id}/status`,
+    data
+  );
+  return res.data;
+};
