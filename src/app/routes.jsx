@@ -18,6 +18,8 @@ import AssignedComplaints from "../pages/officer/AssignedComplaints";
 import OfficerComplaintDetails from "../pages/officer/ComplaintDetails";
 import Departments from "../pages/admin/Departments";
 import Officers from "../pages/admin/Officers";
+import AssignComplaints from "../pages/admin/AssignedComplaints";
+import AuditLogs from "../pages/admin/AuditLogs";
 
 function AppRoutes() {
   return (
@@ -125,6 +127,24 @@ function AppRoutes() {
         element={
           <ProtectedRoute allowedRoles={["admin"]}>
             <Officers />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/admin/assign"
+        element={
+          <ProtectedRoute allowedRoles={["admin"]}>
+            <AssignComplaints />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/admin/audit"
+        element={
+          <ProtectedRoute allowedRoles={["admin"]}>
+            <AuditLogs />
           </ProtectedRoute>
         }
       />

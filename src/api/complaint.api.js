@@ -30,3 +30,19 @@ export const updateComplaintStatus = async (id, data) => {
   );
   return res.data;
 };
+
+
+export const assignComplaint = async (id, data) => {
+  const res = await api.put(
+    `/complaints/${id}/assign`,
+    data
+  );
+  return res.data;
+};
+
+
+// ADMIN - get all complaints
+export const getAllComplaints = async () => {
+  const res = await api.get("/complaints");
+  return res.data.data;
+};
