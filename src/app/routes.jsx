@@ -20,6 +20,10 @@ import Departments from "../pages/admin/Departments";
 import Officers from "../pages/admin/Officers";
 import AssignComplaints from "../pages/admin/AssignedComplaints";
 import AuditLogs from "../pages/admin/AuditLogs";
+import BulkNotifications from "../pages/admin/BulkNotifications";
+import AdminComplaints from "../pages/admin/Complaints";
+import Reports from "../pages/admin/Reports";
+import Dashboard from "../pages/Dashboard";
 
 function AppRoutes() {
   return (
@@ -149,8 +153,35 @@ function AppRoutes() {
         }
       />
 
+      <Route
+        path="/admin/notifications"
+        element={
+          <ProtectedRoute allowedRoles={["admin"]}>
+            <BulkNotifications />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/admin/complaints"
+        element={
+          <ProtectedRoute allowedRoles={["admin"]}>
+            <AdminComplaints />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/admin/reports"
+        element={
+          <ProtectedRoute allowedRoles={["admin"]}>
+            <Reports />
+          </ProtectedRoute>
+        }
+      />
+
       {/* Default */}
-      <Route path="/" element={<h1>Home</h1>} />
+      <Route path="/" element={<Dashboard/>} />
     </Routes>
   );
 }

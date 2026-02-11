@@ -3,16 +3,18 @@ import Sidebar from "./Sidebar";
 
 function MainLayout({ children }) {
   return (
-    <div style={{ display: "flex", minHeight: "100vh" }}>
+    <div className="flex min-h-screen overflow-hidden">
       <Sidebar />
-      <div style={{ flex: 1 }}>
+
+      <div className="flex flex-col flex-1">
         <Navbar />
-        <main style={{ padding: "16px" }}>
+        <main className="flex-1 overflow-y-auto">
           {children}
         </main>
       </div>
     </div>
   );
 }
+
 
 export default MainLayout;

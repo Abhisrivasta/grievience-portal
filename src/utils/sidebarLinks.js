@@ -14,5 +14,8 @@ export const sidebarLinks = {
     { path: "/admin/officers", label: "Officers" },
     { path: "/admin/reports", label: "Reports" },
     { path: "/admin/audit", label: "Audit Logs" },
+    { path: "/admin/complaints", label: "Complaints" },
+    { path: "/admin/notifications", label: "Bulk Notifications" },
+
   ],
 };

@@ -39,9 +39,7 @@ function CreateComplaint() {
         title: form.title,
         description: form.description,
         category: form.category,
-        location: {
-          area: form.area,
-        },
+        location: { area: form.area },
       });
 
       navigate("/citizen/complaints");
@@ -57,66 +55,116 @@ function CreateComplaint() {
 
   return (
     <MainLayout>
-      <h2>Submit New Complaint</h2>
+      {/* Page Background */}
+      <div className="min-h-full px-6 py-8  bg-gradient-to-br from-blue-100 via-slate-100 to-blue-200">
 
-      {error && <p style={{ color: "red" }}>{error}</p>}
-
-      <form onSubmit={handleSubmit} style={{ maxWidth: "500px" }}>
-        <div>
-          <label>Title</label><br />
-          <input
-            type="text"
-            name="title"
-            value={form.title}
-            onChange={handleChange}
-            required
-          />
+        {/* Centered Heading */}
+        <div className="text-center mb-8">
+          <h2 className="text-xl font-semibold text-slate-900">
+            Submit New Complaint
+          </h2>
+          <p className="text-sm text-slate-600 mt-1">
+            Please provide accurate details so your grievance can be resolved efficiently.
+          </p>
         </div>
 
-        <div>
-          <label>Description</label><br />
-          <textarea
-            name="description"
-            value={form.description}
-            onChange={handleChange}
-            rows={4}
-            required
-          />
-        </div>
+        {/* Error */}
+        {error && (
+          <p className="mb-4 text-sm text-red-600 text-center">
+            {error}
+          </p>
+        )}
 
-        <div>
-          <label>Category</label><br />
-          <select
-            name="category"
-            value={form.category}
-            onChange={handleChange}
-            required
+        {/* Centered Form */}
+        <div className="flex justify-center">
+          <form
+            onSubmit={handleSubmit}
+            className="w-full max-w-lg bg-white border border-slate-200
+              rounded-lg p-6 space-y-4"
           >
-            <option value="">Select</option>
-            <option value="Road">Road</option>
-            <option value="Water">Water</option>
-            <option value="Electricity">Electricity</option>
-            <option value="Sanitation">Sanitation</option>
-          </select>
+            {/* Title */}
+            <div>
+              <label className="block text-sm font-medium text-slate-700 mb-1">
+                Title
+              </label>
+              <input
+                type="text"
+                name="title"
+                value={form.title}
+                onChange={handleChange}
+                className="w-full border border-slate-300 rounded-md px-3 py-2 text-sm
+                  focus:outline-none focus:ring-1 focus:ring-blue-500"
+                required
+              />
+            </div>
+
+            {/* Description */}
+            <div>
+              <label className="block text-sm font-medium text-slate-700 mb-1">
+                Description
+              </label>
+              <textarea
+                name="description"
+                value={form.description}
+                onChange={handleChange}
+                rows={4}
+                className="w-full border border-slate-300 rounded-md px-3 py-2 text-sm
+                  focus:outline-none focus:ring-1 focus:ring-blue-500"
+                required
+              />
+            </div>
+
+            {/* Category */}
+            <div>
+              <label className="block text-sm font-medium text-slate-700 mb-1">
+                Category
+              </label>
+              <select
+                name="category"
+                value={form.category}
+                onChange={handleChange}
+                className="w-full border border-slate-300 rounded-md px-3 py-2 text-sm
+                  focus:outline-none focus:ring-1 focus:ring-blue-500"
+                required
+              >
+                <option value="">Select category</option>
+                <option value="Road">Road</option>
+                <option value="Water">Water</option>
+                <option value="Electricity">Electricity</option>
+                <option value="Sanitation">Sanitation</option>
+              </select>
+            </div>
+
+            {/* Area */}
+            <div>
+              <label className="block text-sm font-medium text-slate-700 mb-1">
+                Area / Locality
+              </label>
+              <input
+                type="text"
+                name="area"
+                value={form.area}
+                onChange={handleChange}
+                className="w-full border border-slate-300 rounded-md px-3 py-2 text-sm
+                  focus:outline-none focus:ring-1 focus:ring-blue-500"
+                required
+              />
+            </div>
+
+            {/* Submit */}
+            <div className="pt-2">
+              <button
+                type="submit"
+                disabled={loading}
+                className="w-full px-4 py-2 rounded-md text-sm font-medium text-white
+                  bg-blue-600 hover:bg-blue-700 disabled:opacity-60"
+              >
+                {loading ? "Submitting..." : "Submit Complaint"}
+              </button>
+            </div>
+          </form>
         </div>
-
-        <div>
-          <label>Area / Locality</label><br />
-          <input
-            type="text"
-            name="area"
-            value={form.area}
-            onChange={handleChange}
-            required
-          />
-        </div>
-
-        <br />
-
-        <button type="submit" disabled={loading}>
-          {loading ? "Submitting..." : "Submit Complaint"}
-        </button>
-      </form>
+      </div>
     </MainLayout>
   );
 }

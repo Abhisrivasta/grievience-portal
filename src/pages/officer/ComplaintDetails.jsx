@@ -2,12 +2,13 @@ import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import MainLayout from "../../components/layout/MainLayout";
 import {
-  getComplaintById,
   updateComplaintStatus,
+  getComplaintForOfficer,
 } from "../../api/complaint.api";
 
 function OfficerComplaintDetails() {
   const { id } = useParams();
+
   const [complaint, setComplaint] = useState(null);
   const [status, setStatus] = useState("");
   const [priority, setPriority] = useState("");
@@ -15,29 +16,30 @@ function OfficerComplaintDetails() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
-  useEffect(() => {
-    const fetchComplaint = async () => {
-      try {
-        const res = await getComplaintById(id);
-        setComplaint(res.data);
-        setStatus(res.data.status);
-        setPriority(res.data.priority);
-      } catch (err) {
-        setError(
-          err.response?.data?.message ||
-            "Failed to load complaint"
-        );
-      } finally {
-        setLoading(false);
-      }
-    };
+  const fetchComplaint = async () => {
+    try {
+      const res = await getComplaintForOfficer(id);
+      setComplaint(res.data);
+      setStatus(res.data.status);
+      setPriority(res.data.priority);
+    } catch (err) {
+      setError(
+        err.response?.data?.message ||
+          "Failed to load complaint"
+      );
+    } finally {
+      setLoading(false);
+    }
+  };
 
+  useEffect(() => {
     fetchComplaint();
   }, [id]);
 
   const handleUpdate = async (e) => {
     e.preventDefault();
-    setError("");
+
+    if (complaint.status === "Resolved") return;
 
     try {
       await updateComplaintStatus(id, {
@@ -47,6 +49,8 @@ function OfficerComplaintDetails() {
       });
 
       alert("Complaint updated successfully");
+      setRemark("");
+      fetchComplaint();
     } catch (err) {
       setError(
         err.response?.data?.message ||
@@ -55,80 +59,139 @@ function OfficerComplaintDetails() {
     }
   };
 
-  if (loading) {
-    return (
-      <MainLayout>
-        <p>Loading...</p>
-      </MainLayout>
-    );
-  }
-
-  if (error) {
-    return (
-      <MainLayout>
-        <p style={{ color: "red" }}>{error}</p>
-      </MainLayout>
-    );
-  }
-
   return (
     <MainLayout>
-      <h2>{complaint.title}</h2>
+      {/* Page Background */}
+      <div className="px-6 py-6   bg-gradient-to-br from-blue-100 via-slate-100 to-blue-200 min-h-full">
 
-      <p><strong>Description:</strong> {complaint.description}</p>
-      <p><strong>Citizen:</strong> {complaint.citizen?.name}</p>
+        {/* States */}
+        {loading && (
+          <p className="text-slate-600 text-sm">
+            Loading complaint…
+          </p>
+        )}
 
-      <hr />
+        {error && (
+          <p className="text-red-600 text-sm">
+            {error}
+          </p>
+        )}
 
-      <h3>Update Complaint</h3>
+        {!loading && complaint && (
+          <>
+            {/* Header */}
+            <div className="mb-6">
+              <h2 className="text-2xl font-semibold text-slate-900">
+                {complaint.title}
+              </h2>
+              <p className="text-sm text-slate-600">
+                Complaint details and officer actions
+              </p>
+            </div>
 
-      <form onSubmit={handleUpdate}>
-        <div>
-          <label>Status</label><br />
-          <select
-            value={status}
-            onChange={(e) =>
-              setStatus(e.target.value)
-            }
-            required
-          >
-            <option value="Pending">Pending</option>
-            <option value="In Progress">In Progress</option>
-            <option value="Resolved">Resolved</option>
-          </select>
-        </div>
+            {/* Complaint Info */}
+            <div className="bg-white border border-slate-200 rounded-lg p-5 mb-6">
+              <p className="text-sm text-slate-700 mb-3">
+                <span className="font-medium">Description:</span>{" "}
+                {complaint.description}
+              </p>
 
-        <div>
-          <label>Priority</label><br />
-          <select
-            value={priority}
-            onChange={(e) =>
-              setPriority(e.target.value)
-            }
-          >
-            <option value="Low">Low</option>
-            <option value="Medium">Medium</option>
-            <option value="High">High</option>
-          </select>
-        </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                <p>
+                  <span className="font-medium">Citizen:</span>{" "}
+                  {complaint.citizen?.name}
+                </p>
 
-        <div>
-          <label>Remark</label><br />
-          <textarea
-            value={remark}
-            onChange={(e) =>
-              setRemark(e.target.value)
-            }
-            rows={3}
-          />
-        </div>
+                <p>
+                  <span className="font-medium">Current Status:</span>{" "}
+                  <span className="inline-block px-2 py-0.5 rounded bg-slate-100 text-slate-700">
+                    {complaint.status}
+                  </span>
+                </p>
+              </div>
+            </div>
 
-        <br />
+            {/* Update Section */}
+            <div className="bg-white border border-slate-200 rounded-lg p-5 max-w-lg">
 
-        <button type="submit">
-          Update Complaint
-        </button>
-      </form>
+              <h3 className="text-lg font-medium text-slate-900 mb-4">
+                Update Complaint
+              </h3>
+
+              {complaint.status === "Resolved" && (
+                <p className="text-sm text-green-600 mb-4">
+                  This complaint has been resolved and is locked.
+                </p>
+              )}
+
+              <form onSubmit={handleUpdate} className="space-y-4">
+
+                {/* Status */}
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-1">
+                    Status
+                  </label>
+                  <select
+                    value={status}
+                    onChange={(e) => setStatus(e.target.value)}
+                    disabled={complaint.status === "Resolved"}
+                    className="w-full border border-slate-300 rounded-md px-3 py-2 text-sm
+                      focus:outline-none focus:ring-1 focus:ring-blue-500"
+                    required
+                  >
+                    <option value="In Progress">In Progress</option>
+                    <option value="Resolved">Resolved</option>
+                  </select>
+                </div>
+
+                {/* Priority */}
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-1">
+                    Priority
+                  </label>
+                  <select
+                    value={priority}
+                    onChange={(e) => setPriority(e.target.value)}
+                    disabled={complaint.status === "Resolved"}
+                    className="w-full border border-slate-300 rounded-md px-3 py-2 text-sm
+                      focus:outline-none focus:ring-1 focus:ring-blue-500"
+                  >
+                    <option value="Low">Low</option>
+                    <option value="Medium">Medium</option>
+                    <option value="High">High</option>
+                  </select>
+                </div>
+
+                {/* Remark */}
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-1">
+                    Remark
+                  </label>
+                  <textarea
+                    value={remark}
+                    onChange={(e) => setRemark(e.target.value)}
+                    rows={3}
+                    disabled={complaint.status === "Resolved"}
+                    className="w-full border border-slate-300 rounded-md px-3 py-2 text-sm
+                      focus:outline-none focus:ring-1 focus:ring-blue-500"
+                  />
+                </div>
+
+                {/* Submit */}
+                {complaint.status !== "Resolved" && (
+                  <button
+                    type="submit"
+                    className="px-4 py-2 rounded-md text-sm font-medium text-white
+                      bg-blue-600 hover:bg-blue-700"
+                  >
+                    Update Complaint
+                  </button>
+                )}
+              </form>
+            </div>
+          </>
+        )}
+      </div>
     </MainLayout>
   );
 }

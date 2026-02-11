@@ -4,15 +4,34 @@ import { getProfile } from "../api/auth.api";
 const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
-  const [user, setUser] = useState(
-    JSON.parse(localStorage.getItem("user")) || null
-  );
+  // Safe Initial State: JSON.parse error se bachne ke liye logic
+  const [user, setUser] = useState(() => {
+    try {
+      const savedUser = localStorage.getItem("user");
+      // Check if null, undefined string, or empty
+      if (savedUser && savedUser !== "undefined" && savedUser !== "null") {
+        return JSON.parse(savedUser);
+      }
+    } catch (error) {
+      console.error("AuthContext: Error parsing user from localStorage", error);
+      localStorage.removeItem("user"); // Cleanup corrupt data
+    }
+    return null;
+  });
+
   const [loading, setLoading] = useState(true);
+
+  // Helper: State aur LocalStorage dono ko ek saath sync rakhne ke liye
+  const updateUser = (userData) => {
+    if (userData) {
+      localStorage.setItem("user", JSON.stringify(userData));
+      setUser(userData);
+    }
+  };
 
   const login = (data) => {
     localStorage.setItem("token", data.token);
-    localStorage.setItem("user", JSON.stringify(data.user));
-    setUser(data.user);
+    updateUser(data.user);
   };
 
   const logout = () => {
@@ -31,14 +50,12 @@ export const AuthProvider = ({ children }) => {
 
       try {
         const res = await getProfile();
-        setUser(res.data);
-        localStorage.setItem(
-          "user",
-          JSON.stringify(res.data)
-        );
+        // Backend response: res.data (if it directly returns the user)
+        // or res.data.data (if wrapped). Assuming res.data for now based on your getProfile
+        updateUser(res.data);
       } catch (err) {
-        localStorage.clear();
-        setUser(null);
+        console.error("Verification failed", err);
+        logout(); // Token invalid hai toh saaf kar do
       } finally {
         setLoading(false);
       }
@@ -49,7 +66,7 @@ export const AuthProvider = ({ children }) => {
 
   return (
     <AuthContext.Provider
-      value={{ user, login, logout, loading }}
+      value={{ user, setUser, updateUser, login, logout, loading }}
     >
       {children}
     </AuthContext.Provider>

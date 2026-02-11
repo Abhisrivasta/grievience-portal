@@ -27,39 +27,100 @@ function AdminDashboard() {
 
   return (
     <MainLayout>
-      <h2>Admin Dashboard</h2>
+      {/* Page Background */}
+      <div className="min-h-full bg-gradient-to-br from-blue-100 via-slate-100 to-blue-200">
+        <div className="px-6 py-8">
 
-      {loading && <p>Loading...</p>}
-      {error && <p style={{ color: "red" }}>{error}</p>}
-
-      {metrics && (
-        <div style={{ display: "flex", gap: "16px", marginTop: "20px" }}>
-          <div style={{ border: "1px solid #ddd", padding: "16px" }}>
-            <h4>Total Complaints</h4>
-            <p>{metrics.totalComplaints}</p>
+          {/* Header */}
+          <div className="mb-8">
+            <h1 className="text-2xl font-semibold text-slate-900">
+              Admin Dashboard
+            </h1>
+            <p className="text-sm text-slate-600 max-w-2xl">
+              System-wide overview of grievances, resolution progress, and citizen feedback.
+            </p>
           </div>
 
-          <div style={{ border: "1px solid #ddd", padding: "16px" }}>
-            <h4>Pending</h4>
-            <p>{metrics.pendingComplaints}</p>
+          {/* States */}
+          {loading && (
+            <p className="text-slate-600 text-sm">
+              Loading dashboard data…
+            </p>
+          )}
+
+          {error && (
+            <p className="text-red-600 text-sm">
+              {error}
+            </p>
+          )}
+
+          {/* Metrics Cards */}
+          {metrics && (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-5 mb-8">
+
+              <div className="bg-white/90 backdrop-blur-sm border border-slate-200 rounded-lg p-5">
+                <p className="text-sm text-slate-600">
+                  Total Complaints
+                </p>
+                <p className="mt-2 text-3xl font-semibold text-slate-900">
+                  {metrics.totalComplaints}
+                </p>
+              </div>
+
+              <div className="bg-white/90 backdrop-blur-sm border border-slate-200 rounded-lg p-5">
+                <p className="text-sm text-slate-600">
+                  Pending
+                </p>
+                <p className="mt-2 text-3xl font-semibold text-slate-900">
+                  {metrics.pendingComplaints}
+                </p>
+              </div>
+
+              <div className="bg-white/90 backdrop-blur-sm border border-slate-200 rounded-lg p-5">
+                <p className="text-sm text-slate-600">
+                  In Progress
+                </p>
+                <p className="mt-2 text-3xl font-semibold text-slate-900">
+                  {metrics.inProgressComplaints}
+                </p>
+              </div>
+
+              <div className="bg-white/90 backdrop-blur-sm border border-slate-200 rounded-lg p-5">
+                <p className="text-sm text-slate-600">
+                  Resolved
+                </p>
+                <p className="mt-2 text-3xl font-semibold text-slate-900">
+                  {metrics.resolvedComplaints}
+                </p>
+              </div>
+
+              <div className="bg-white/90 backdrop-blur-sm border border-slate-200 rounded-lg p-5">
+                <p className="text-sm text-slate-600">
+                  Average Rating
+                </p>
+                <p className="mt-2 text-3xl font-semibold text-slate-900">
+                  {metrics.averageRating ?? "—"}
+                </p>
+              </div>
+
+            </div>
+          )}
+
+          {/* Info Section */}
+          <div className="bg-white/90 backdrop-blur-sm border border-slate-200 rounded-lg p-6 max-w-3xl">
+            <h3 className="font-medium text-slate-900 mb-1">
+              Administrative Overview
+            </h3>
+            <p className="text-sm text-slate-600 leading-relaxed">
+              This dashboard provides a consolidated view of grievance handling
+              across departments. Administrators can monitor workload, resolution
+              efficiency, and overall citizen satisfaction to ensure transparency
+              and accountability.
+            </p>
           </div>
 
-          <div style={{ border: "1px solid #ddd", padding: "16px" }}>
-            <h4>In Progress</h4>
-            <p>{metrics.inProgressComplaints}</p>
-          </div>
-
-          <div style={{ border: "1px solid #ddd", padding: "16px" }}>
-            <h4>Resolved</h4>
-            <p>{metrics.resolvedComplaints}</p>
-          </div>
-
-          <div style={{ border: "1px solid #ddd", padding: "16px" }}>
-            <h4>Average Rating</h4>
-            <p>{metrics.averageRating}</p>
-          </div>
         </div>
-      )}
+      </div>
     </MainLayout>
   );
 }

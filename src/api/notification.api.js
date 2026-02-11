@@ -18,3 +18,12 @@ export const markAsRead = async (id) => {
   );
   return res.data;
 };
+
+
+export const sendBulkNotification = async (data) => {
+  const res = await api.post(
+    "/notifications/bulk",
+    data
+  );
+  return res.data;
+};
