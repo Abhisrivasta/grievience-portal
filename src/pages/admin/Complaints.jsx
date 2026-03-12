@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 import { useEffect, useState } from "react";
 import MainLayout from "../../components/layout/MainLayout";
 import { getAllComplaints, assignComplaint } from "../../api/complaint.api";
@@ -77,18 +78,12 @@ function AdminComplaints() {
 
   }, []);
 
-  /* ---------------------------
-     RELOAD WHEN PAGE CHANGES
-  --------------------------- */
+
 
   useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
     loadComplaints();
   }, [page]);
 
-  /* ---------------------------
-     HANDLE SELECT CHANGES
-  --------------------------- */
 
   const handleInputChange = (complaintId, field, value) => {
 
@@ -102,9 +97,7 @@ function AdminComplaints() {
 
   };
 
-  /* ---------------------------
-     ASSIGN COMPLAINT
-  --------------------------- */
+ 
 
   const handleAssign = async (complaintId) => {
 
@@ -133,9 +126,7 @@ function AdminComplaints() {
 
   };
 
-  /* ---------------------------
-     STATUS COLOR
-  --------------------------- */
+
 
   const getStatusColor = (status) => {
 
@@ -273,7 +264,6 @@ function AdminComplaints() {
 
             </div>
 
-            {/* Pagination */}
 
             <div className="flex justify-center gap-4 mt-10">
 

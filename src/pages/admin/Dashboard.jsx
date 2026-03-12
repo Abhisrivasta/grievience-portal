@@ -27,12 +27,10 @@ function AdminDashboard() {
 
   return (
     <MainLayout>
-      {/* Page Background */}
-      <div className="min-h-full bg-gradient-to-br from-blue-100 via-slate-100 to-blue-200">
+       <div className="min-h-full bg-gradient-to-br from-blue-100 via-slate-100 to-blue-200">
         <div className="px-6 py-8">
 
-          {/* Header */}
-          <div className="mb-8">
+           <div className="mb-8">
             <h1 className="text-2xl font-semibold text-slate-900">
               Admin Dashboard
             </h1>
@@ -41,8 +39,7 @@ function AdminDashboard() {
             </p>
           </div>
 
-          {/* States */}
-          {loading && (
+           {loading && (
             <p className="text-slate-600 text-sm">
               Loading dashboard data…
             </p>
@@ -54,8 +51,7 @@ function AdminDashboard() {
             </p>
           )}
 
-          {/* Metrics Cards */}
-          {metrics && (
+           {metrics && (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-5 mb-8">
 
               <div className="bg-white/90 backdrop-blur-sm border border-slate-200 rounded-lg p-5">
@@ -106,8 +102,7 @@ function AdminDashboard() {
             </div>
           )}
 
-          {/* Info Section */}
-          <div className="bg-white/90 backdrop-blur-sm border border-slate-200 rounded-lg p-6 max-w-3xl">
+           <div className="bg-white/90 backdrop-blur-sm border border-slate-200 rounded-lg p-6 max-w-3xl">
             <h3 className="font-medium text-slate-900 mb-1">
               Administrative Overview
             </h3>

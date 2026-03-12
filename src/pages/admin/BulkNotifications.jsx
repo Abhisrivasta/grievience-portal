@@ -55,15 +55,13 @@ function BulkNotifications() {
   return (
     <MainLayout>
       <div className="px-6 py-8  bg-gradient-to-br from-blue-100 via-slate-100 to-blue-200 min-h-screen">
-        {/* Page Header */}
-        <div className="mb-8">
+         <div className="mb-8">
           <h2 className="text-2xl font-bold text-slate-900">Bulk Notifications</h2>
           <p className="text-slate-500 text-sm">Send important updates or alerts to multiple users at once.</p>
         </div>
 
         <div className="max-w-3xl mx-auto">
-          {/* Status Messages */}
-          {error && (
+           {error && (
             <div className="mb-6 p-4 bg-red-50 border border-red-100 text-red-600 rounded-xl text-sm flex items-center gap-2">
               <span className="font-bold">Error:</span> {error}
             </div>
@@ -74,15 +72,13 @@ function BulkNotifications() {
             </div>
           )}
 
-          {/* Main Form Card */}
-          <div className="bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden">
+           <div className="bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden">
             <div className="p-6 border-b border-slate-100 bg-slate-50/50">
               <h4 className="font-semibold text-slate-800">New Broadcast Message</h4>
             </div>
 
             <form onSubmit={handleSend} className="p-6 space-y-6">
-              {/* Target Selection */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
                   <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">
                     Recipient Group
@@ -117,8 +113,7 @@ function BulkNotifications() {
                 )}
               </div>
 
-              {/* Message Area */}
-              <div>
+               <div>
                 <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">
                   Broadcast Message
                 </label>
@@ -134,8 +129,7 @@ function BulkNotifications() {
                 </p>
               </div>
 
-              {/* Action Button */}
-              <div className="flex justify-end pt-2">
+               <div className="flex justify-end pt-2">
                 <button
                   type="submit"
                   disabled={loading}

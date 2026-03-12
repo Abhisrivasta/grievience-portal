@@ -12,8 +12,7 @@ function Officers() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
-  // Pagination for List
-  const [currentPage, setCurrentPage] = useState(1);
+   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 5;
 
   const loadData = async () => {
@@ -57,8 +56,7 @@ function Officers() {
     }
   };
 
-  // Pagination Logic
-  const indexOfLastItem = currentPage * itemsPerPage;
+   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
   const currentOfficers = officers.slice(indexOfFirstItem, indexOfLastItem);
   const totalPages = Math.ceil(officers.length / itemsPerPage);
@@ -66,8 +64,7 @@ function Officers() {
   return (
     <MainLayout>
       <div className="px-6 py-8 bg-gradient-to-br from-blue-100 via-slate-100 to-blue-200 min-h-screen">
-        {/* Header */}
-        <div className="mb-8">
+         <div className="mb-8">
           <h2 className="text-2xl font-bold text-slate-900">Officer Directory</h2>
           <p className="text-slate-500 text-sm">Assign departments and manage officer profiles.</p>
         </div>
@@ -80,8 +77,7 @@ function Officers() {
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
           
-          {/* LEFT: Assignment Form */}
-          <div className="lg:col-span-4 bg-white border border-slate-200 rounded-xl p-6 shadow-sm sticky top-6">
+           <div className="lg:col-span-4 bg-white border border-slate-200 rounded-xl p-6 shadow-sm sticky top-6">
             <h4 className="font-semibold text-slate-800 mb-5 flex items-center gap-2">
               <span className="w-2 h-6 bg-blue-600 rounded-full"></span>
               Assign / Update Profile
@@ -137,8 +133,7 @@ function Officers() {
             </form>
           </div>
 
-          {/* RIGHT: Officer List */}
-          <div className="lg:col-span-8">
+           <div className="lg:col-span-8">
             <div className="flex justify-between items-center mb-5">
               <h4 className="font-semibold text-slate-800 text-lg">All Officers ({officers.length})</h4>
             </div>
@@ -185,8 +180,7 @@ function Officers() {
               ))}
             </div>
 
-            {/* Pagination */}
-            {officers.length > itemsPerPage && (
+             {officers.length > itemsPerPage && (
               <div className="mt-6 flex items-center justify-between bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
                 <button
                   disabled={currentPage === 1}

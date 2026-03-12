@@ -3,7 +3,7 @@ import { submitFeedback } from "../../api/feedback.api";
 
 function FeedbackForm({ complaintId, onSubmitted }) {
   const [rating, setRating] = useState(5);
-  const [hover, setHover] = useState(0); // For star hover effect
+  const [hover, setHover] = useState(0); 
   const [comment, setComment] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -41,8 +41,7 @@ function FeedbackForm({ complaintId, onSubmitted }) {
           </div>
         )}
 
-        {/* Star Rating Section */}
-        <div className="text-center py-2">
+         <div className="text-center py-2">
           <label className="block text-xs font-bold text-slate-400 uppercase tracking-widest mb-4">
             How would you rate the resolution?
           </label>
@@ -79,8 +78,7 @@ function FeedbackForm({ complaintId, onSubmitted }) {
           </p>
         </div>
 
-        {/* Comment Section */}
-        <div>
+         <div>
           <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">
             Additional Comments <span className="text-slate-300 normal-case">(Optional)</span>
           </label>
@@ -93,8 +91,7 @@ function FeedbackForm({ complaintId, onSubmitted }) {
           />
         </div>
 
-        {/* Submit Button */}
-        <button
+         <button
           type="submit"
           disabled={loading}
           className="w-full flex items-center justify-center gap-2 py-3 bg-slate-900 hover:bg-slate-800 text-white rounded-xl font-bold text-sm transition-all shadow-lg active:scale-95 disabled:opacity-50"

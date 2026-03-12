@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 import { useEffect, useState } from "react";
 import MainLayout from "../../components/layout/MainLayout";
 import { getAuditLogs } from "../../api/audit.api";
@@ -9,12 +10,11 @@ function AuditLogs() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
-  // 1. Load logs function ko simplify kiya
-  const loadLogs = async () => {
+   const loadLogs = async () => {
     setLoading(true);
-    setError(""); // Purana error clear karein
+    setError(""); 
     try {
-      const res = await getAuditLogs(page); // page state se direct uthayega
+      const res = await getAuditLogs(page);  
       setLogs(res.data);
       setTotalPages(res.totalPages);
     } catch (err) {
@@ -24,11 +24,9 @@ function AuditLogs() {
     }
   };
 
-  // 2. Page change hone par auto-fetch
-  useEffect(() => {
+   useEffect(() => {
     loadLogs();
-    // Scroll to top jab page badle
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+     window.scrollTo({ top: 0, behavior: 'smooth' });
   }, [page]);
 
   const getActionColor = (action) => {
@@ -43,8 +41,7 @@ function AuditLogs() {
     <MainLayout>
       <div className="px-6 py-8 bg-slate-50 min-h-screen">
         
-        {/* Header */}
-        <div className="mb-8 flex flex-col md:flex-row md:items-end justify-between gap-4">
+         <div className="mb-8 flex flex-col md:flex-row md:items-end justify-between gap-4">
           <div>
             <h2 className="text-3xl font-extrabold text-slate-900 tracking-tight">System Audit Logs</h2>
             <p className="text-slate-500 mt-1">Real-time activity tracking for platform security.</p>
@@ -60,8 +57,7 @@ function AuditLogs() {
           </div>
         )}
 
-        {/* Timeline Logic */}
-        <div className="relative min-h-[400px]">
+         <div className="relative min-h-[400px]">
           {loading ? (
             <div className="flex flex-col items-center justify-center py-20">
               <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-600"></div>
@@ -114,8 +110,7 @@ function AuditLogs() {
           )}
         </div>
 
-        {/* Pagination Controls */}
-        {!loading && logs.length > 0 && (
+         {!loading && logs.length > 0 && (
           <div className="mt-10 flex items-center justify-between bg-white px-6 py-4 rounded-2xl border border-slate-200 shadow-sm">
             <button
               disabled={page <= 1}
@@ -126,8 +121,7 @@ function AuditLogs() {
             </button>
 
             <div className="flex items-center gap-2">
-               {/* Current Page Indicator */}
-               <div className="h-8 w-8 flex items-center justify-center bg-blue-600 text-white rounded-lg font-bold text-sm shadow-md shadow-blue-200">
+                <div className="h-8 w-8 flex items-center justify-center bg-blue-600 text-white rounded-lg font-bold text-sm shadow-md shadow-blue-200">
                   {page}
                </div>
                <span className="text-slate-400 font-medium">of</span>

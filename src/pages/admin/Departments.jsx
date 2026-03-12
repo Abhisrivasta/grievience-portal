@@ -13,8 +13,7 @@ function Departments() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
-  // Pagination State
-  const [currentPage, setCurrentPage] = useState(1);
+   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 5;
 
   const loadDepartments = async () => {
@@ -30,8 +29,7 @@ function Departments() {
     loadDepartments();
   }, []);
 
-  // Pagination Logic
-  const indexOfLastItem = currentPage * itemsPerPage;
+   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
   const currentItems = departments.slice(indexOfFirstItem, indexOfLastItem);
   const totalPages = Math.ceil(departments.length / itemsPerPage);
@@ -69,19 +67,16 @@ function Departments() {
   return (
     <MainLayout>
       <div className="px-6 py-8 bg-gradient-to-br from-blue-100 via-slate-100 to-blue-200 min-h-screen">
-        {/* Page Header */}
-        <div className="mb-8">
+         <div className="mb-8">
           <h2 className="text-2xl font-bold text-slate-900">Department Management</h2>
           <p className="text-slate-500">Create new departments and manage existing ones side by side.</p>
         </div>
 
         {error && <p className="text-red-600 bg-red-50 p-3 rounded-md mb-6 border border-red-100">{error}</p>}
 
-        {/* --- Side-by-Side Container --- */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
           
-          {/* Left Column: Create Form (Takes 4/12 spaces) */}
-          <div className="lg:col-span-4 bg-white border border-slate-200 rounded-xl p-6 shadow-sm sticky top-6">
+           <div className="lg:col-span-4 bg-white border border-slate-200 rounded-xl p-6 shadow-sm sticky top-6">
             <h4 className="font-semibold text-slate-800 mb-5 text-lg">Create Department</h4>
             <form onSubmit={handleCreate} className="space-y-4">
               <div>
@@ -118,8 +113,7 @@ function Departments() {
             </form>
           </div>
 
-          {/* Right Column: List (Takes 8/12 spaces) */}
-          <div className="lg:col-span-8">
+           <div className="lg:col-span-8">
             <h4 className="font-semibold text-slate-800 mb-5 text-lg">Existing Departments ({departments.length})</h4>
             <div className="space-y-3">
               {currentItems.map((d) => (
@@ -147,8 +141,7 @@ function Departments() {
               ))}
             </div>
 
-            {/* Pagination UI */}
-            {departments.length > itemsPerPage && (
+             {departments.length > itemsPerPage && (
               <div className="mt-8 flex items-center justify-between bg-white p-4 rounded-xl border border-slate-200">
                 <span className="text-xs text-slate-500 font-medium">
                   Page {currentPage} of {totalPages}

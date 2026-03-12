@@ -11,7 +11,6 @@ function AssignComplaints() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   
-  // Track selections for each complaint ID
   const [selectedData, setSelectedData] = useState({});
 
   const loadData = async () => {
@@ -21,7 +20,6 @@ function AssignComplaints() {
       const deptRes = await getDepartments();
       const officerRes = await getOfficers();
 
-      // Only unassigned complaints filter
       setComplaints(complaintsData.filter((c) => !c.assignedOfficer));
       setDepartments(deptRes.data);
       setOfficers(officerRes.data);
@@ -54,7 +52,6 @@ function AssignComplaints() {
     try {
       await assignComplaint(complaintId, { officerId, departmentId });
       loadData();
-      // Clear specific local state
       const newSelections = { ...selectedData };
       delete newSelections[complaintId];
       setSelectedData(newSelections);
@@ -67,8 +64,7 @@ function AssignComplaints() {
     <MainLayout>
       <div className="px-6 py-8 bg-slate-50 min-h-screen">
         
-        {/* Page Header */}
-        <div className="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-4">
+         <div className="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-4">
           <div>
             <h2 className="text-2xl font-bold text-slate-900">Assign Complaints</h2>
             <p className="text-slate-500 text-sm italic">
@@ -110,8 +106,7 @@ function AssignComplaints() {
               complaints.map((c) => (
                 <div key={c._id} className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm flex flex-col lg:flex-row lg:items-center gap-6">
                   
-                  {/* Left: Content */}
-                  <div className="flex-1 border-b lg:border-b-0 lg:border-r border-slate-100 pb-4 lg:pb-0 lg:pr-6">
+                   <div className="flex-1 border-b lg:border-b-0 lg:border-r border-slate-100 pb-4 lg:pb-0 lg:pr-6">
                     <span className="text-[10px] font-bold text-blue-600 bg-blue-50 px-2 py-0.5 rounded uppercase tracking-wider mb-2 inline-block">
                       {c.category}
                     </span>
@@ -119,8 +114,7 @@ function AssignComplaints() {
                     <p className="text-sm text-slate-500 mt-1">ID: {c._id.substring(0, 8)}...</p>
                   </div>
 
-                  {/* Right: Assignment Controls */}
-                  <div className="flex flex-col sm:flex-row items-end gap-3 lg:w-3/5">
+                   <div className="flex flex-col sm:flex-row items-end gap-3 lg:w-3/5">
                     <div className="w-full">
                       <label className="text-[10px] font-bold text-slate-400 uppercase ml-1 mb-1 block">Officer</label>
                       <select 

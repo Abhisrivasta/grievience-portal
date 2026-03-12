@@ -18,8 +18,7 @@ function NotificationBell() {
 
   return (
     <div ref={containerRef} className="relative">
-      {/* Bell Icon & Unread Badge */}
-      <button
+       <button
         onClick={() => setOpen((o) => !o)}
         className="relative p-2 text-slate-600 hover:bg-slate-100 rounded-full transition-all active:scale-90"
       >
@@ -37,8 +36,7 @@ function NotificationBell() {
         )}
       </button>
 
-      {/* Notification Dropdown */}
-      {open && (
+       {open && (
         <div className="absolute right-0 mt-3 w-80 bg-white border border-slate-200 rounded-2xl shadow-xl z-[100] overflow-hidden animate-in fade-in zoom-in-95 duration-100 origin-top-right">
           <div className="px-4 py-3 border-b border-slate-100 bg-slate-50 flex justify-between items-center">
             <h4 className="font-bold text-slate-800 text-sm">Notifications</h4>

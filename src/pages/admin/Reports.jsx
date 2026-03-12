@@ -51,8 +51,7 @@ function Reports() {
     <MainLayout>
       <div className="px-6 py-8 bg-gradient-to-br from-blue-100 via-slate-100 to-blue-200 min-h-screen">
         
-        {/* Header Section */}
-        <div className="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-4">
+         <div className="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-4">
           <div>
             <h2 className="text-2xl font-bold text-slate-900">Reports & Analytics</h2>
             <p className="text-slate-500 text-sm">Monitor system performance and officer efficiency.</p>
@@ -79,8 +78,7 @@ function Reports() {
         ) : (
           <div className="space-y-10">
             
-            {/* Top Row: Quick Stats (Complaint Status) */}
-            <section>
+             <section>
               <h3 className="text-lg font-semibold text-slate-800 mb-4 flex items-center gap-2">
                 <span className="w-1.5 h-5 bg-blue-500 rounded-full"></span>
                 Complaint Status Overview
@@ -98,8 +96,7 @@ function Reports() {
               </div>
             </section>
 
-            {/* Bottom Row: Officer Performance Table */}
-            <section>
+             <section>
               <h3 className="text-lg font-semibold text-slate-800 mb-4 flex items-center gap-2">
                 <span className="w-1.5 h-5 bg-indigo-500 rounded-full"></span>
                 Officer Performance Leaderboard

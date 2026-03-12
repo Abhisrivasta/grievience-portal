@@ -7,8 +7,7 @@ function Unauthorized() {
     <div className="min-h-screen bg-slate-50 flex items-center justify-center px-6 py-12">
       <div className="max-w-md w-full text-center">
         
-        {/* Animated Shield/Lock Icon */}
-        <div className="relative mb-8 flex justify-center">
+         <div className="relative mb-8 flex justify-center">
           <div className="absolute inset-0 bg-red-100 rounded-full blur-3xl scale-150 opacity-50" />
           <div className="relative bg-white p-6 rounded-3xl shadow-xl border border-red-50">
             <svg 
@@ -28,8 +27,7 @@ function Unauthorized() {
           </div>
         </div>
 
-        {/* Error Code & Message */}
-        <div className="space-y-4">
+         <div className="space-y-4">
           <h1 className="text-8xl font-black text-slate-200 select-none">403</h1>
           <h2 className="text-2xl font-bold text-slate-900 -mt-10 relative">
             Access Denied
@@ -39,8 +37,7 @@ function Unauthorized() {
           </p>
         </div>
 
-        {/* Action Buttons */}
-        <div className="mt-10 flex flex-col gap-3">
+         <div className="mt-10 flex flex-col gap-3">
           <button
             onClick={() => navigate("/")}
             className="w-full py-3.5 bg-slate-900 hover:bg-slate-800 text-white rounded-2xl font-bold text-sm shadow-lg shadow-slate-200 transition-all active:scale-95"
@@ -49,15 +46,14 @@ function Unauthorized() {
           </button>
           
           <button
-            onClick={() => navigate(-1)} // Go back to previous page
+            onClick={() => navigate(-1)}  
             className="w-full py-3.5 bg-white border border-slate-200 text-slate-600 hover:bg-slate-50 rounded-2xl font-bold text-sm transition-all"
           >
             Go Back
           </button>
         </div>
 
-        {/* Footer Support */}
-        <p className="mt-8 text-xs text-slate-400">
+         <p className="mt-8 text-xs text-slate-400">
           Security ID: <span className="font-mono text-[10px] uppercase">err_unauthorized_403</span>
         </p>
       </div>

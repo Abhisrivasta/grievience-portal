@@ -6,8 +6,7 @@ function LogoutButton({ collapsed = false }) {
   const navigate = useNavigate();
 
   const handleLogout = () => {
-    // Adding a small confirmation for better UX
-    if (window.confirm("Are you sure you want to logout?")) {
+     if (window.confirm("Are you sure you want to logout?")) {
       logout();
       navigate("/login");
     }
@@ -23,8 +22,7 @@ function LogoutButton({ collapsed = false }) {
         group active:scale-95
       `}
     >
-      {/* Logout Icon */}
-      <svg
+       <svg
         xmlns="http://www.w3.org/2000/svg"
         className="h-5 w-5 shrink-0 group-hover:translate-x-1 transition-transform"
         fill="none"
@@ -39,8 +37,7 @@ function LogoutButton({ collapsed = false }) {
         />
       </svg>
 
-      {/* Label - hidden if collapsed is true (useful for sidebars) */}
-      {!collapsed && (
+       {!collapsed && (
         <span className="font-semibold text-sm">Sign Out</span>
       )}
     </button>
