@@ -1,7 +1,7 @@
 import axios from "axios";
 
 const api = axios.create({
-  baseURL: "https://spotty-fans-train.loca.lt/api",
+  baseURL: "https://grievanceportal.loca.lt/api",
   headers: {
     "Content-Type": "application/json",
   },
