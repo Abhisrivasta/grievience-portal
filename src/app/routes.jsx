@@ -1,5 +1,6 @@
 import { Routes, Route } from "react-router-dom";
 import ProtectedRoute from "../components/common/ProtectedRoute";
+
 import Profile from "../pages/Profile";
 
 import Login from "../pages/auth/Login";
@@ -7,15 +8,15 @@ import Register from "../pages/auth/Register";
 import Unauthorized from "../pages/Unauthorized";
 
 import CitizenDashboard from "../pages/citizen/Dashboard";
-import OfficerDashboard from "../pages/officer/Dashboard";
-import AdminDashboard from "../pages/admin/Dashboard";
-
 import MyComplaints from "../pages/citizen/MyComplaints";
 import ComplaintDetails from "../pages/citizen/ComplaintDetails";
 import CreateComplaint from "../pages/citizen/CreateComplaint";
 
+import OfficerDashboard from "../pages/officer/Dashboard";
 import AssignedComplaints from "../pages/officer/AssignedComplaints";
 import OfficerComplaintDetails from "../pages/officer/ComplaintDetails";
+
+import AdminDashboard from "../pages/admin/Dashboard";
 import Departments from "../pages/admin/Departments";
 import Officers from "../pages/admin/Officers";
 import AssignComplaints from "../pages/admin/AssignedComplaints";
@@ -23,177 +24,53 @@ import AuditLogs from "../pages/admin/AuditLogs";
 import BulkNotifications from "../pages/admin/BulkNotifications";
 import AdminComplaints from "../pages/admin/Complaints";
 import Reports from "../pages/admin/Reports";
-import Dashboard from "../pages/Dashboard";
 import Feedback from "../pages/admin/Feedback";
 
-function 
-AppRoutes() {
+import Dashboard from "../pages/Dashboard";
+
+function AppRoutes() {
   return (
     <Routes>
-      <Route
-        path="/profile"
-        element={
-          <ProtectedRoute allowedRoles={["citizen", "officer", "admin"]}>
-            <Profile />
-          </ProtectedRoute>
-        }
-      />
 
-      {/* Public */}
+      {/* Public Routes */}
+      <Route path="/" element={<Dashboard />} />
       <Route path="/login" element={<Login />} />
       <Route path="/register" element={<Register />} />
       <Route path="/unauthorized" element={<Unauthorized />} />
 
-      {/* Citizen */}
-      <Route
-        path="/citizen"
-        element={
-          <ProtectedRoute allowedRoles={["citizen"]}>
-            <CitizenDashboard />
-          </ProtectedRoute>
-        }
-      />
+      {/* Profile (All Roles) */}
+      <Route element={<ProtectedRoute allowedRoles={["citizen","officer","admin"]} />}>
+        <Route path="/profile" element={<Profile />} />
+      </Route>
 
-      {/* Officer */}
-      <Route
-        path="/officer"
-        element={
-          <ProtectedRoute allowedRoles={["officer"]}>
-            <OfficerDashboard />
-          </ProtectedRoute>
-        }
-      />
+      {/* Citizen Routes */}
+      <Route element={<ProtectedRoute allowedRoles={["citizen"]} />}>
+        <Route path="/citizen" element={<CitizenDashboard />} />
+        <Route path="/citizen/complaints" element={<MyComplaints />} />
+        <Route path="/citizen/complaints/:id" element={<ComplaintDetails />} />
+        <Route path="/citizen/create" element={<CreateComplaint />} />
+      </Route>
 
-      {/* Admin */}
-      <Route
-        path="/admin"
-        element={
-          <ProtectedRoute allowedRoles={["admin"]}>
-            <AdminDashboard />
-          </ProtectedRoute>
-        }
-      />
+      {/* Officer Routes */}
+      <Route element={<ProtectedRoute allowedRoles={["officer"]} />}>
+        <Route path="/officer" element={<OfficerDashboard />} />
+        <Route path="/officer/assigned" element={<AssignedComplaints />} />
+        <Route path="/officer/complaints/:id" element={<OfficerComplaintDetails />} />
+      </Route>
 
-      <Route
-        path="/citizen/complaints"
-        element={
-          <ProtectedRoute allowedRoles={["citizen"]}>
-            <MyComplaints />
-          </ProtectedRoute>
-        }
-      />
+      {/* Admin Routes */}
+      <Route element={<ProtectedRoute allowedRoles={["admin"]} />}>
+        <Route path="/admin" element={<AdminDashboard />} />
+        <Route path="/admin/departments" element={<Departments />} />
+        <Route path="/admin/officers" element={<Officers />} />
+        <Route path="/admin/assign" element={<AssignComplaints />} />
+        <Route path="/admin/audit" element={<AuditLogs />} />
+        <Route path="/admin/notifications" element={<BulkNotifications />} />
+        <Route path="/admin/complaints" element={<AdminComplaints />} />
+        <Route path="/admin/reports" element={<Reports />} />
+        <Route path="/admin/feedback" element={<Feedback />} />
+      </Route>
 
-      <Route
-        path="/citizen/complaints/:id"
-        element={
-          <ProtectedRoute allowedRoles={["citizen"]}>
-            <ComplaintDetails />
-          </ProtectedRoute>
-        }
-      />
-
-      <Route
-        path="/citizen/create"
-        element={
-          <ProtectedRoute allowedRoles={["citizen"]}>
-            <CreateComplaint />
-          </ProtectedRoute>
-        }
-      />
-
-      <Route
-        path="/officer/assigned"
-        element={
-          <ProtectedRoute allowedRoles={["officer"]}>
-            <AssignedComplaints />
-          </ProtectedRoute>
-        }
-      />
-
-      <Route
-        path="/officer/complaints/:id"
-        element={
-          <ProtectedRoute allowedRoles={["officer"]}>
-            <OfficerComplaintDetails />
-          </ProtectedRoute>
-        }
-      />
-
-      <Route
-        path="/admin/departments"
-        element={
-          <ProtectedRoute allowedRoles={["admin"]}>
-            <Departments />
-          </ProtectedRoute>
-        }
-      />
-
-      <Route
-        path="/admin/officers"
-        element={
-          <ProtectedRoute allowedRoles={["admin"]}>
-            <Officers />
-          </ProtectedRoute>
-        }
-      />
-
-      <Route
-        path="/admin/assign"
-        element={
-          <ProtectedRoute allowedRoles={["admin"]}>
-            <AssignComplaints />
-          </ProtectedRoute>
-        }
-      />
-
-      <Route
-        path="/admin/audit"
-        element={
-          <ProtectedRoute allowedRoles={["admin"]}>
-            <AuditLogs />
-          </ProtectedRoute>
-        }
-      />
-      
-       <Route 
-        path="/admin/feedback"
-        element={
-          <ProtectedRoute allowedRoles={["admin"]}> 
-            <Feedback />
-          </ProtectedRoute>
-        }
-      /> 
-
-
-      <Route
-        path="/admin/notifications"
-        element={
-          <ProtectedRoute allowedRoles={["admin"]}>
-            <BulkNotifications />
-          </ProtectedRoute>
-        }
-      />
-
-      <Route
-        path="/admin/complaints"
-        element={
-          <ProtectedRoute allowedRoles={["admin"]}>
-            <AdminComplaints />
-          </ProtectedRoute>
-        }
-      />
-
-      <Route
-        path="/admin/reports"
-        element={
-          <ProtectedRoute allowedRoles={["admin"]}>
-            <Reports />
-          </ProtectedRoute>
-        }
-      />
-
-      {/* Default */}
-      <Route path="/" element={<Dashboard/>} />
     </Routes>
   );
 }
