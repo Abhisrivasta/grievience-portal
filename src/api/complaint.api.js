@@ -36,10 +36,9 @@ export const updateComplaintStatus = async (id, data) => {
 /* =======================
    ADMIN
 ======================= */
-
-export const getAllComplaints = async () => {
-  const res = await api.get("/complaints");
-  return res.data.data; // ONLY complaints array
+export const getAllComplaints = async (page = 1, limit = 5) => {
+  const res = await api.get(`/complaints?page=${page}&limit=${limit}`);
+  return res.data;
 };
 
 export const assignComplaint = async (id, data) => {

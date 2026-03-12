@@ -24,8 +24,10 @@ import BulkNotifications from "../pages/admin/BulkNotifications";
 import AdminComplaints from "../pages/admin/Complaints";
 import Reports from "../pages/admin/Reports";
 import Dashboard from "../pages/Dashboard";
+import Feedback from "../pages/admin/Feedback";
 
-function AppRoutes() {
+function 
+AppRoutes() {
   return (
     <Routes>
       <Route
@@ -152,6 +154,16 @@ function AppRoutes() {
           </ProtectedRoute>
         }
       />
+      
+       <Route 
+        path="/admin/feedback"
+        element={
+          <ProtectedRoute allowedRoles={["admin"]}> 
+            <Feedback />
+          </ProtectedRoute>
+        }
+      /> 
+
 
       <Route
         path="/admin/notifications"

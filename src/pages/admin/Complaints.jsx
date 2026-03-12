@@ -5,180 +5,309 @@ import { getDepartments } from "../../api/department.api";
 import { getOfficers } from "../../api/officer.api";
 
 function AdminComplaints() {
+
   const [complaints, setComplaints] = useState([]);
   const [departments, setDepartments] = useState([]);
   const [officers, setOfficers] = useState([]);
+
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
-  // Local state for assignments
   const [assignments, setAssignments] = useState({});
 
-  const loadData = async () => {
-    setLoading(true);
-    try {
-      const complaintsData = await getAllComplaints();
-      const departmentsRes = await getDepartments();
-      const officersRes = await getOfficers();
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
 
-      setComplaints(complaintsData);
-      setDepartments(departmentsRes.data);
-      setOfficers(officersRes.data);
+  const limit = 5;
+
+  /* ---------------------------
+     LOAD COMPLAINTS
+  --------------------------- */
+
+  const loadComplaints = async () => {
+    try {
+
+      const res = await getAllComplaints(page, limit);
+
+      setComplaints(res.data);
+      setTotalPages(res.totalPages);
+
     } catch (err) {
       setError("Failed to load complaints");
-      console.log(err)
-    } finally {
-      setLoading(false);
+      console.log(err);
     }
   };
 
+  /* ---------------------------
+     LOAD STATIC DATA
+  --------------------------- */
+
+  const loadStaticData = async () => {
+    try {
+
+      const departmentsRes = await getDepartments();
+      const officersRes = await getOfficers();
+
+      setDepartments(departmentsRes.data);
+      setOfficers(officersRes.data);
+
+    } catch (err) {
+      console.log(err);
+    }
+  };
+
+  /* ---------------------------
+     INITIAL LOAD
+  --------------------------- */
+
   useEffect(() => {
-    loadData();
+
+    const init = async () => {
+      setLoading(true);
+
+      await Promise.all([
+        loadStaticData(),
+        loadComplaints()
+      ]);
+
+      setLoading(false);
+    };
+
+    init();
+
   }, []);
 
+  /* ---------------------------
+     RELOAD WHEN PAGE CHANGES
+  --------------------------- */
+
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    loadComplaints();
+  }, [page]);
+
+  /* ---------------------------
+     HANDLE SELECT CHANGES
+  --------------------------- */
+
   const handleInputChange = (complaintId, field, value) => {
-    setAssignments((prev) => ({
+
+    setAssignments(prev => ({
       ...prev,
       [complaintId]: {
         ...prev[complaintId],
-        [field]: value,
-      },
+        [field]: value
+      }
     }));
+
   };
 
+  /* ---------------------------
+     ASSIGN COMPLAINT
+  --------------------------- */
+
   const handleAssign = async (complaintId) => {
+
     const { officerId, departmentId } = assignments[complaintId] || {};
 
     if (!officerId || !departmentId) {
-      alert("Please select both an officer and a department");
+      alert("Select both officer and department");
       return;
     }
 
     try {
+
       await assignComplaint(complaintId, { officerId, departmentId });
-      // Reset assignment local state for this complaint
-      setAssignments((prev) => {
+
+      setAssignments(prev => {
         const next = { ...prev };
         delete next[complaintId];
         return next;
       });
-      loadData();
+
+      loadComplaints();
+
     } catch (err) {
       alert(err.response?.data?.message || "Assignment failed");
     }
+
   };
 
+  /* ---------------------------
+     STATUS COLOR
+  --------------------------- */
+
   const getStatusColor = (status) => {
+
     switch (status?.toLowerCase()) {
-      case "pending": return "bg-amber-100 text-amber-700 border-amber-200";
-      case "resolved": return "bg-green-100 text-green-700 border-green-200";
-      case "in-progress": return "bg-blue-100 text-blue-700 border-blue-200";
-      default: return "bg-slate-100 text-slate-700 border-slate-200";
+
+      case "pending":
+        return "bg-amber-100 text-amber-700 border-amber-200";
+
+      case "resolved":
+        return "bg-green-100 text-green-700 border-green-200";
+
+      case "in progress":
+        return "bg-blue-100 text-blue-700 border-blue-200";
+
+      default:
+        return "bg-slate-100 text-slate-700 border-slate-200";
+
     }
+
   };
 
   return (
+
     <MainLayout>
-      <div className="px-6 py-8  bg-gradient-to-br from-blue-100 via-slate-100 to-blue-200 min-h-screen">
-        {/* Header */}
+
+      <div className="px-6 py-8 bg-gradient-to-br from-blue-100 via-slate-100 to-blue-200 min-h-screen">
+
         <div className="mb-8">
-          <h2 className="text-2xl font-bold text-slate-900">Admin Complaints Control</h2>
-          <p className="text-slate-500 text-sm">Review incoming complaints and delegate tasks to officers.</p>
+          <h2 className="text-2xl font-bold text-slate-900">
+            Admin Complaints Control
+          </h2>
+          <p className="text-slate-500 text-sm">
+            Review incoming complaints and delegate tasks to officers.
+          </p>
         </div>
 
         {error && (
-          <div className="bg-red-50 text-red-600 p-4 rounded-xl border border-red-100 mb-6 flex items-center gap-2">
-            <span className="font-bold">Error:</span> {error}
+          <div className="bg-red-50 text-red-600 p-4 rounded-xl border border-red-100 mb-6">
+            {error}
           </div>
         )}
 
         {loading ? (
-          <div className="flex justify-center py-20 animate-pulse text-slate-400 font-medium">
-            Fetching complaints queue...
+          <div className="text-center py-20 text-slate-400">
+            Loading complaints...
           </div>
         ) : (
-          <div className="grid gap-6">
-            {complaints.length === 0 ? (
-              <div className="bg-white border border-dashed border-slate-300 rounded-2xl p-12 text-center text-slate-500">
-                No complaints currently in the queue.
-              </div>
-            ) : (
-              complaints.map((c) => (
-                <div key={c._id} className="bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-shadow">
-                  <div className="flex flex-col md:flex-row md:items-center">
-                    
-                    {/* Left: Info Section */}
-                    <div className="p-6 md:w-2/3 border-b md:border-b-0 md:border-r border-slate-100">
-                      <div className="flex items-center gap-3 mb-3">
-                        <span className={`px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider border ${getStatusColor(c.status)}`}>
-                          {c.status}
-                        </span>
-                        <span className="text-slate-300 text-xs">|</span>
-                        <span className="text-xs font-semibold text-slate-500 uppercase">{c.category}</span>
-                      </div>
-                      
-                      <h4 className="text-lg font-bold text-slate-900 mb-2">{c.title}</h4>
-                      
-                      <div className="space-y-1">
-                        <p className="text-sm text-slate-600">
-                          <span className="font-bold text-slate-400 uppercase text-[10px] mr-2">Citizen:</span>
-                          {c.citizen?.name} <span className="text-slate-400 text-xs italic">({c.citizen?.email})</span>
-                        </p>
-                      </div>
+
+          <>
+            <div className="grid gap-6">
+
+              {complaints.map(c => (
+
+                <div
+                  key={c._id}
+                  className="bg-white border border-slate-200 rounded-xl p-6 shadow-sm"
+                >
+
+                  <div className="flex justify-between items-center">
+
+                    <div>
+
+                      <span className={`px-2 py-1 text-xs rounded border ${getStatusColor(c.status)}`}>
+                        {c.status}
+                      </span>
+
+                      <h4 className="font-bold text-lg mt-2">
+                        {c.title}
+                      </h4>
+
+                      <p className="text-sm text-slate-600 mt-1">
+                        Citizen: {c.citizen?.name}
+                      </p>
+
                     </div>
 
-                    {/* Right: Action Section */}
-                    <div className="p-6 md:w-1/3 bg-slate-50/50 flex flex-col justify-center">
+                    <div className="w-64 space-y-2">
+
                       {c.assignedOfficer ? (
-                        <div className="text-center md:text-left">
-                          <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Current Assignment</p>
-                          <p className="text-green-600 font-bold flex items-center gap-2">
-                            <span className="h-2 w-2 bg-green-500 rounded-full animate-pulse"></span>
-                            {c.assignedOfficer.name}
-                          </p>
-                        </div>
+
+                        <p className="text-green-600 font-semibold">
+                          Assigned to {c.assignedOfficer.name}
+                        </p>
+
                       ) : (
-                        <div className="space-y-3">
-                          <select 
-                            className="w-full bg-white border border-slate-200 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-blue-500 transition-all"
+
+                        <>
+                          <select
+                            className="w-full border rounded p-2 text-sm"
                             value={assignments[c._id]?.officerId || ""}
-                            onChange={(e) => handleInputChange(c._id, "officerId", e.target.value)}
+                            onChange={(e) =>
+                              handleInputChange(c._id, "officerId", e.target.value)
+                            }
                           >
                             <option value="">Select Officer</option>
-                            {officers.map((o) => (
-                              <option key={o._id} value={o._id}>{o.name}</option>
+                            {officers.map(o => (
+                              <option key={o._id} value={o._id}>
+                                {o.name}
+                              </option>
                             ))}
                           </select>
 
-                          <select 
-                            className="w-full bg-white border border-slate-200 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-blue-500 transition-all"
+                          <select
+                            className="w-full border rounded p-2 text-sm"
                             value={assignments[c._id]?.departmentId || ""}
-                            onChange={(e) => handleInputChange(c._id, "departmentId", e.target.value)}
+                            onChange={(e) =>
+                              handleInputChange(c._id, "departmentId", e.target.value)
+                            }
                           >
                             <option value="">Select Department</option>
-                            {departments.map((d) => (
-                              <option key={d._id} value={d._id}>{d.name}</option>
+                            {departments.map(d => (
+                              <option key={d._id} value={d._id}>
+                                {d.name}
+                              </option>
                             ))}
                           </select>
 
                           <button
                             onClick={() => handleAssign(c._id)}
-                            className="w-full py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-bold shadow-lg shadow-blue-100 transition-all active:scale-95"
+                            className="w-full bg-blue-600 text-white py-2 rounded"
                           >
-                            Assign Task
+                            Assign
                           </button>
-                        </div>
+
+                        </>
                       )}
+
                     </div>
+
                   </div>
+
                 </div>
-              ))
-            )}
-          </div>
+
+              ))}
+
+            </div>
+
+            {/* Pagination */}
+
+            <div className="flex justify-center gap-4 mt-10">
+
+              <button
+                disabled={page === 1}
+                onClick={() => setPage(page - 1)}
+                className="px-4 py-2 bg-slate-200 rounded disabled:opacity-40"
+              >
+                Prev
+              </button>
+
+              <span className="font-semibold">
+                Page {page} / {totalPages}
+              </span>
+
+              <button
+                disabled={page === totalPages}
+                onClick={() => setPage(page + 1)}
+                className="px-4 py-2 bg-slate-200 rounded disabled:opacity-40"
+              >
+                Next
+              </button>
+
+            </div>
+
+          </>
         )}
+
       </div>
+
     </MainLayout>
+
   );
+
 }
 
 export default AdminComplaints;
