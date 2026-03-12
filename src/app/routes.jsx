@@ -11,8 +11,8 @@ import OfficerDashboard from "../pages/officer/Dashboard";
 import AdminDashboard from "../pages/admin/Dashboard";
 
 import MyComplaints from "../pages/citizen/MyComplaints";
-import ComplaintDetails from "../pages/citizen/complaintDetails";
-import CreateComplaint from "../pages/citizen/createComplaint";
+import ComplaintDetails from "../pages/citizen/ComplaintDetails";
+import CreateComplaint from "../pages/citizen/CreateComplaint";
 
 import AssignedComplaints from "../pages/officer/AssignedComplaints";
 import OfficerComplaintDetails from "../pages/officer/ComplaintDetails";
