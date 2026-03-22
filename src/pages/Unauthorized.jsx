@@ -44,7 +44,7 @@ function Unauthorized() {
           >
             Go to Dashboard
           </button>
-          
+          {/*  */}
           <button
             onClick={() => navigate(-1)}  
             className="w-full py-3.5 bg-white border border-slate-200 text-slate-600 hover:bg-slate-50 rounded-2xl font-bold text-sm transition-all"
