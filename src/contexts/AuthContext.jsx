@@ -1,48 +1,55 @@
+/* eslint-disable react-refresh/only-export-components */
 import { createContext, useContext, useEffect, useState } from "react";
 import { getProfile } from "../api/auth.api";
 
 const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
-  // Safe Initial State: JSON.parse error se bachne ke liye logic
-  const [user, setUser] = useState(() => {
-    try {
-      const savedUser = localStorage.getItem("user");
-      // Check if null, undefined string, or empty
-      if (savedUser && savedUser !== "undefined" && savedUser !== "null") {
-        return JSON.parse(savedUser);
-      }
-    } catch (error) {
-      console.error("AuthContext: Error parsing user from localStorage", error);
-      localStorage.removeItem("user"); // Cleanup corrupt data
-    }
-    return null;
-  });
-
+  const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  // Helper: State aur LocalStorage dono ko ek saath sync rakhne ke liye
+  // ✅ Safely update user
   const updateUser = (userData) => {
-    if (userData) {
-      localStorage.setItem("user", JSON.stringify(userData));
-      setUser(userData);
+    if (!userData || !userData.role) {
+      console.error("Invalid user data:", userData);
+      return;
     }
+
+    localStorage.setItem("user", JSON.stringify(userData));
+    setUser(userData);
   };
 
+  // ✅ Login
   const login = (data) => {
     localStorage.setItem("token", data.token);
     updateUser(data.user);
   };
 
+  // ✅ Logout
   const logout = () => {
-    localStorage.clear();
+    localStorage.removeItem("token");
+    localStorage.removeItem("user");
     setUser(null);
   };
 
-  // On app load, verify user via backend
+  // ✅ On app load → restore + verify user
   useEffect(() => {
-    const verifyUser = async () => {
+    const initAuth = async () => {
       const token = localStorage.getItem("token");
+      const savedUser = localStorage.getItem("user");
+
+      // 🔹 Step 1: restore from localStorage (fast UI)
+      if (savedUser && savedUser !== "undefined" && savedUser !== "null") {
+        try {
+          const parsedUser = JSON.parse(savedUser);
+          setUser(parsedUser);
+        } catch (err) {
+          console.error("Invalid stored user:", err);
+          localStorage.removeItem("user");
+        }
+      }
+
+      // 🔹 Step 2: verify with backend
       if (!token) {
         setLoading(false);
         return;
@@ -50,23 +57,25 @@ export const AuthProvider = ({ children }) => {
 
       try {
         const res = await getProfile();
-        // Backend response: res.data (if it directly returns the user)
-        // or res.data.data (if wrapped). Assuming res.data for now based on your getProfile
-        updateUser(res.data);
+
+        // 🔥 CRITICAL FIX (handle both response shapes)
+        const userData = res.data.user || res.data;
+
+        updateUser(userData);
       } catch (err) {
         console.error("Verification failed", err);
-        logout(); // Token invalid hai toh saaf kar do
+        logout();
       } finally {
         setLoading(false);
       }
     };
 
-    verifyUser();
+    initAuth();
   }, []);
 
   return (
     <AuthContext.Provider
-      value={{ user, setUser, updateUser, login, logout, loading }}
+      value={{ user, login, logout, loading }}
     >
       {children}
     </AuthContext.Provider>
