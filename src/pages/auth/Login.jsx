@@ -20,7 +20,6 @@ function Login() {
     try {
       const res = await loginUser({ email, password });
       login(res);
-      console.log("Login successful:", res);
 
       if (res.user.role === "citizen") navigate("/citizen");
       else if (res.user.role === "officer") navigate("/officer");

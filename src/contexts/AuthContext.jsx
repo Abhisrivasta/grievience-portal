@@ -19,26 +19,22 @@ export const AuthProvider = ({ children }) => {
     setUser(userData);
   };
 
-  // ✅ Login
   const login = (data) => {
     localStorage.setItem("token", data.token);
     updateUser(data.user);
   };
 
-  // ✅ Logout
   const logout = () => {
     localStorage.removeItem("token");
     localStorage.removeItem("user");
     setUser(null);
   };
 
-  // ✅ On app load → restore + verify user
   useEffect(() => {
     const initAuth = async () => {
       const token = localStorage.getItem("token");
       const savedUser = localStorage.getItem("user");
 
-      // 🔹 Step 1: restore from localStorage (fast UI)
       if (savedUser && savedUser !== "undefined" && savedUser !== "null") {
         try {
           const parsedUser = JSON.parse(savedUser);
@@ -49,7 +45,6 @@ export const AuthProvider = ({ children }) => {
         }
       }
 
-      // 🔹 Step 2: verify with backend
       if (!token) {
         setLoading(false);
         return;
@@ -58,7 +53,6 @@ export const AuthProvider = ({ children }) => {
       try {
         const res = await getProfile();
 
-        // 🔥 CRITICAL FIX (handle both response shapes)
         const userData = res.data.user || res.data;
 
         updateUser(userData);
