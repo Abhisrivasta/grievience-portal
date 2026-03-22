@@ -24,7 +24,7 @@ function Login() {
 
       if (res.user.role === "citizen") navigate("/citizen");
       else if (res.user.role === "officer") navigate("/officer");
-      else if (res.user.role === "admin") navigate("/admin");
+      else if (res.user.role === "admin") navigate("/admin/complaints");
     } catch (err) {
       setError(
         err.response?.data?.message || "Login failed"
