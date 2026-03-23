@@ -8,7 +8,6 @@ export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  // ✅ Safely update user
   const updateUser = (userData) => {
     if (!userData || !userData.role) {
       console.error("Invalid user data:", userData);

@@ -38,7 +38,6 @@ function Login() {
       
       <div className="w-full max-w-5xl bg-white rounded-3xl shadow-2xl grid grid-cols-1 md:grid-cols-2 overflow-hidden">
         
-        {/* LEFT INFO PANEL */}
         <div className="hidden md:flex flex-col justify-center bg-gradient-to-br from-blue-600 to-indigo-700 text-white p-10">
           <h2 className="text-4xl font-extrabold mb-4">
             Welcome Back
@@ -57,7 +56,6 @@ function Login() {
           </ul>
         </div>
 
-        {/* RIGHT LOGIN FORM */}
         <div className="p-8 md:p-10">
           <h3 className="text-3xl font-bold text-gray-800">
             Login to your account

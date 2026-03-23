@@ -12,7 +12,6 @@ function Navbar() {
   return (
     <header className="sticky top-0 z-40 h-16 flex items-center justify-between px-6 bg-white border-b border-slate-200 shadow-sm">
 
-      {/* Left */}
       <div className="flex items-center gap-4">
         <div className="bg-blue-600 p-2 rounded-lg">
           <span className="text-white font-bold">GP</span>
@@ -28,7 +27,6 @@ function Navbar() {
         </div>
       </div>
 
-      {/* Right */}
       <div className="flex items-center gap-4">
 
         <NotificationBell />

@@ -8,7 +8,6 @@ function Profile() {
   const [isEditing, setIsEditing] = useState(false);
   const [updating, setUpdating] = useState(false);
   
-  // Local states for form
   const [name, setName] = useState(user?.name || "");
   const [photoPreview, setPhotoPreview] = useState(null);
   const fileInputRef = useRef(null);
@@ -35,7 +34,6 @@ function Profile() {
 
     try {
       const res = await updateProfile(formData);
-      // Backend response: res.data (success) -> res.data.data (user object)
       updateUser(res.data); 
       setIsEditing(false);
       setPhotoPreview(null);
@@ -58,7 +56,6 @@ function Profile() {
           <div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
             <div className="p-8 flex flex-col md:flex-row items-center gap-6">
               
-              {/* Avatar Logic */}
               <div className="relative group">
                 <div className="h-28 w-28 rounded-2xl bg-indigo-600 flex items-center justify-center text-white text-3xl font-bold shadow-xl border-4 border-white overflow-hidden">
                   {photoPreview ? (
@@ -83,7 +80,6 @@ function Profile() {
                 <input type="file" ref={fileInputRef} hidden onChange={handlePhotoChange} accept="image/*" />
               </div>
 
-              {/* Info Logic */}
               <div className="text-center md:text-left flex-1">
                 {isEditing ? (
                   <input 
@@ -98,7 +94,6 @@ function Profile() {
                 <p className="text-slate-500">{user?.email}</p>
               </div>
 
-              {/* Edit/Save Buttons */}
               <div className="flex gap-2">
                 {isEditing ? (
                   <>
@@ -117,7 +112,6 @@ function Profile() {
               </div>
             </div>
 
-            {/* Static Details */}
             <div className="grid grid-cols-1 md:grid-cols-3 border-t border-slate-100 bg-slate-50/50">
                <div className="p-6 text-center border-r border-slate-100">
                   <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-1">Role</p>

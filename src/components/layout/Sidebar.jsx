@@ -8,7 +8,6 @@ function Sidebar() {
   const { user } = useAuth();
   const [collapsed, setCollapsed] = useState(false);
 
-  // ✅ Safe fallback instead of returning null
   if (!user) {
     return (
       <aside className="w-60 bg-blue-950 text-white flex items-center justify-center">
@@ -31,7 +30,6 @@ function Sidebar() {
         collapsed ? "w-16" : "w-60"
       }`}
     >
-      {/* Header */}
       <div className="flex items-center justify-between px-4 py-5 border-b border-blue-900">
         {!collapsed && (
           <div>
@@ -52,9 +50,7 @@ function Sidebar() {
         </button>
       </div>
 
-      {/* Navigation */}
       <nav className="px-2 py-4 space-y-1 text-sm">
-        {/* Profile */}
         <NavLink
           to="/profile"
           className={({ isActive }) =>
@@ -67,7 +63,6 @@ function Sidebar() {
 
         <div className="my-4 border-t border-blue-900" />
 
-        {/* Role based links */}
         {sidebarLinks[user.role]?.map((item) => (
           <NavLink
             key={item.path}

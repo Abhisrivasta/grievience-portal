@@ -4,7 +4,6 @@ export default function Dashboard() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-indigo-900 via-slate-900 to-blue-900 text-white flex flex-col">
 
-      {/* HERO SECTION */}
       <section className="flex-1 flex flex-col items-center justify-center text-center px-6">
   
         <h1 className="text-5xl md:text-6xl font-extrabold tracking-tight mt-4">
@@ -17,8 +16,7 @@ export default function Dashboard() {
           real-time.
         </p>
 
-        {/* ACTION CARD */}
-        <div className="mt-12 bg-white text-gray-900 rounded-3xl shadow-2xl p-10 w-full max-w-md">
+\        <div className="mt-12 bg-white text-gray-900 rounded-3xl shadow-2xl p-10 w-full max-w-md">
           <h2 className="text-2xl font-bold text-center mb-6">
             Get Started
           </h2>
@@ -41,8 +39,7 @@ export default function Dashboard() {
         </div>
       </section>
 
-      {/* FEATURES SECTION */}
-      <section className="bg-black/20 backdrop-blur py-20">
+\      <section className="bg-black/20 backdrop-blur py-20">
         <div className="max-w-7xl mx-auto px-8">
           <h2 className="text-3xl font-bold text-center mb-12">
             Why use this portal?
@@ -88,8 +85,7 @@ export default function Dashboard() {
         </div>
       </section>
 
-      {/* FOOTER */}
-      <footer className="text-center text-sm text-gray-400 py-6">
+\      <footer className="text-center text-sm text-gray-400 py-6">
         © {new Date().getFullYear()} Digital Grievance Redressal System. All rights reserved.
       </footer>
     </div>

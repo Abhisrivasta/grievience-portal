@@ -24,10 +24,9 @@ export const getProfile = async () => {
 };
 
 
-// src/api/auth.api.js
 export const updateProfile = async (formData) => {
   const response = await api.put(
-    "/auth/update-profile", // Yahan dhyan dein: update-profile (hyphen)
+    "/auth/update-profile", 
     formData,
     {
       headers: {

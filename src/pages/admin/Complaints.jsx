@@ -21,9 +21,7 @@ function AdminComplaints() {
 
   const limit = 5;
 
-  /* ---------------------------
-     LOAD COMPLAINTS
-  --------------------------- */
+
 
   const loadComplaints = async () => {
     try {
@@ -39,9 +37,6 @@ function AdminComplaints() {
     }
   };
 
-  /* ---------------------------
-     LOAD STATIC DATA
-  --------------------------- */
 
   const loadStaticData = async () => {
     try {
@@ -57,9 +52,7 @@ function AdminComplaints() {
     }
   };
 
-  /* ---------------------------
-     INITIAL LOAD
-  --------------------------- */
+
 
   useEffect(() => {
 

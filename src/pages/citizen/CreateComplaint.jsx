@@ -55,10 +55,8 @@ function CreateComplaint() {
 
   return (
     <MainLayout>
-      {/* Page Background */}
       <div className="min-h-full px-6 py-8  bg-gradient-to-br from-blue-100 via-slate-100 to-blue-200">
 
-        {/* Centered Heading */}
         <div className="text-center mb-8">
           <h2 className="text-xl font-semibold text-slate-900">
             Submit New Complaint
@@ -68,21 +66,18 @@ function CreateComplaint() {
           </p>
         </div>
 
-        {/* Error */}
         {error && (
           <p className="mb-4 text-sm text-red-600 text-center">
             {error}
           </p>
         )}
 
-        {/* Centered Form */}
         <div className="flex justify-center">
           <form
             onSubmit={handleSubmit}
             className="w-full max-w-lg bg-white border border-slate-200
               rounded-lg p-6 space-y-4"
           >
-            {/* Title */}
             <div>
               <label className="block text-sm font-medium text-slate-700 mb-1">
                 Title
@@ -98,7 +93,6 @@ function CreateComplaint() {
               />
             </div>
 
-            {/* Description */}
             <div>
               <label className="block text-sm font-medium text-slate-700 mb-1">
                 Description
@@ -114,7 +108,6 @@ function CreateComplaint() {
               />
             </div>
 
-            {/* Category */}
             <div>
               <label className="block text-sm font-medium text-slate-700 mb-1">
                 Category
@@ -135,7 +128,6 @@ function CreateComplaint() {
               </select>
             </div>
 
-            {/* Area */}
             <div>
               <label className="block text-sm font-medium text-slate-700 mb-1">
                 Area / Locality
@@ -151,7 +143,6 @@ function CreateComplaint() {
               />
             </div>
 
-            {/* Submit */}
             <div className="pt-2">
               <button
                 type="submit"

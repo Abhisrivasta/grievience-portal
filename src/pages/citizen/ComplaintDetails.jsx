@@ -30,10 +30,8 @@ function ComplaintDetails() {
 
   return (
     <MainLayout>
-      {/* Page Wrapper */}
       <div className="px-6 py-6  bg-gradient-to-br from-blue-100 via-slate-100 to-blue-200 min-h-full">
 
-        {/* States */}
         {loading && (
           <p className="text-slate-600 text-sm">
             Loading complaint details…
@@ -48,7 +46,6 @@ function ComplaintDetails() {
 
         {!loading && complaint && (
           <>
-            {/* Header */}
             <div className="mb-6">
               <h2 className="text-2xl font-semibold text-slate-900">
                 {complaint.title}
@@ -58,7 +55,6 @@ function ComplaintDetails() {
               </p>
             </div>
 
-            {/* Complaint Info Card */}
             <div className="bg-white border border-slate-200 rounded-lg p-5 mb-6">
               <p className="text-sm text-slate-700 mb-3">
                 <span className="font-medium">Description:</span>{" "}
@@ -99,7 +95,6 @@ function ComplaintDetails() {
               </div>
             </div>
 
-            {/* Timeline */}
             <div className="mb-6">
               <h3 className="text-lg font-medium text-slate-900 mb-3">
                 Complaint Timeline
@@ -137,7 +132,6 @@ function ComplaintDetails() {
               </div>
             </div>
 
-            {/* Feedback */}
             {complaint.status === "Resolved" && (
               <div className="bg-white border border-slate-200 rounded-lg p-5">
                 <h3 className="text-lg font-medium text-slate-900 mb-2">

@@ -28,10 +28,8 @@ function MyComplaints() {
 
   return (
     <MainLayout>
-      {/* Page Wrapper */}
       <div className="px-6 py-6  bg-gradient-to-br from-blue-100 via-slate-100 to-blue-200 min-h-full">
 
-        {/* Page Header */}
         <div className="mb-6">
           <h2 className="text-2xl font-semibold text-slate-900">
             My Complaints
@@ -41,7 +39,6 @@ function MyComplaints() {
           </p>
         </div>
 
-        {/* States */}
         {loading && (
           <p className="text-slate-600 text-sm">
             Loading complaints…
@@ -60,7 +57,6 @@ function MyComplaints() {
           </p>
         )}
 
-        {/* Complaints List */}
         <div className="space-y-4">
           {complaints.map((c) => (
             <div

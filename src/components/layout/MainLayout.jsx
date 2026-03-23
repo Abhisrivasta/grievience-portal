@@ -5,7 +5,6 @@ import { useAuth } from "../../contexts/AuthContext";
 function MainLayout({ children }) {
   const { loading } = useAuth();
 
-  // ✅ Handle loading properly
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
