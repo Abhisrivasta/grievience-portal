@@ -7,6 +7,9 @@ import Login from "../pages/auth/Login";
 import Register from "../pages/auth/Register";
 import Unauthorized from "../pages/Unauthorized";
 
+// 🔥 NEW
+import Home from "../pages/Home";
+
 import CitizenDashboard from "../pages/citizen/Dashboard";
 import MyComplaints from "../pages/citizen/MyComplaints";
 import ComplaintDetails from "../pages/citizen/ComplaintDetails";
@@ -26,24 +29,25 @@ import AdminComplaints from "../pages/admin/Complaints";
 import Reports from "../pages/admin/Reports";
 import Feedback from "../pages/admin/Feedback";
 
-import Dashboard from "../pages/Dashboard";
+// 🔥 NEW
+import AdminHomeEditor from "../pages/admin/AdminHomeEditor";
 
 function AppRoutes() {
   return (
     <Routes>
 
-      {/* Public Routes */}
-      <Route path="/" element={<Dashboard />} />
+      {/* ✅ PUBLIC ROUTES */}
+      <Route path="/" element={<Home />} />   {/* 🔥 FIXED */}
       <Route path="/login" element={<Login />} />
       <Route path="/register" element={<Register />} />
       <Route path="/unauthorized" element={<Unauthorized />} />
 
-      {/* Profile (All Roles) */}
+      {/* ✅ PROFILE (ALL ROLES) */}
       <Route element={<ProtectedRoute allowedRoles={["citizen","officer","admin"]} />}>
         <Route path="/profile" element={<Profile />} />
       </Route>
 
-      {/* Citizen Routes */}
+      {/* ✅ CITIZEN */}
       <Route element={<ProtectedRoute allowedRoles={["citizen"]} />}>
         <Route path="/citizen" element={<CitizenDashboard />} />
         <Route path="/citizen/complaints" element={<MyComplaints />} />
@@ -51,16 +55,20 @@ function AppRoutes() {
         <Route path="/citizen/create" element={<CreateComplaint />} />
       </Route>
 
-      {/* Officer Routes */}
+      {/* ✅ OFFICER */}
       <Route element={<ProtectedRoute allowedRoles={["officer"]} />}>
         <Route path="/officer" element={<OfficerDashboard />} />
         <Route path="/officer/assigned" element={<AssignedComplaints />} />
         <Route path="/officer/complaints/:id" element={<OfficerComplaintDetails />} />
       </Route>
 
-      {/* Admin Routes */}
+      {/* ✅ ADMIN */}
       <Route element={<ProtectedRoute allowedRoles={["admin"]} />}>
         <Route path="/admin" element={<AdminDashboard />} />
+
+        {/* 🔥 NEW CMS ROUTE */}
+        <Route path="/admin/home" element={<AdminHomeEditor />} />
+
         <Route path="/admin/departments" element={<Departments />} />
         <Route path="/admin/officers" element={<Officers />} />
         <Route path="/admin/assign" element={<AssignComplaints />} />

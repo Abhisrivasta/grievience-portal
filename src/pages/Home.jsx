@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 
-export default function Dashboard() {
+export default function Home() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-indigo-900 via-slate-900 to-blue-900 text-white flex flex-col">
 
