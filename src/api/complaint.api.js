@@ -1,44 +1,57 @@
 import api from "./axios";
 
+// 👤 CITIZEN
 
-export const getMyComplaints = async () => {
-  const res = await api.get("/complaints/my");
+// Get my complaints (with filters, pagination)
+export const getMyComplaints = async (params = {}) => {
+  const res = await api.get("/complaints/my", { params });
   return res.data;
 };
 
+// Get single complaint (UPDATED ROUTE)
 export const getComplaintById = async (id) => {
-  const res = await api.get(`/complaints/${id}`);
+  const res = await api.get(`/complaints/citizen/${id}`);
   return res.data;
 };
 
+// Create complaint
 export const createComplaint = async (data) => {
   const res = await api.post("/complaints", data);
   return res.data;
 };
 
-export const getAssignedComplaints = async () => {
-  const res = await api.get("/complaints/assigned");
+
+// 👨‍💼 OFFICER
+
+// Get assigned complaints (with filters, search, pagination)
+export const getAssignedComplaints = async (params = {}) => {
+  const res = await api.get("/complaints/assigned", { params });
   return res.data;
 };
 
+// Get single complaint (officer view)
+export const getComplaintForOfficer = async (id) => {
+  const res = await api.get(`/complaints/officer/${id}`);
+  return res.data;
+};
+
+// Update complaint status
 export const updateComplaintStatus = async (id, data) => {
   const res = await api.put(`/complaints/${id}/status`, data);
   return res.data;
 };
 
 
-export const getAllComplaints = async (page = 1, limit = 5) => {
-  const res = await api.get(`/complaints?page=${page}&limit=${limit}`);
+// 👑 ADMIN
+
+// Get all complaints (FULL POWER API)
+export const getAllComplaints = async (params = {}) => {
+  const res = await api.get("/complaints", { params });
   return res.data;
 };
 
+// Assign complaint to officer
 export const assignComplaint = async (id, data) => {
   const res = await api.put(`/complaints/${id}/assign`, data);
-  return res.data;
-};
-
-
-export const getComplaintForOfficer = async (id) => {
-  const res = await api.get(`/complaints/officer/${id}`);
   return res.data;
 };

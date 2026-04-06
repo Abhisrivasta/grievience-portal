@@ -1,3 +1,5 @@
+/* eslint-disable react-hooks/exhaustive-deps */
+/* eslint-disable no-unused-vars */
 import { useEffect, useState } from "react";
 import MainLayout from "../../components/layout/MainLayout";
 import {
@@ -9,21 +11,31 @@ import {
 function Reports() {
   const [analytics, setAnalytics] = useState([]);
   const [officerReport, setOfficerReport] = useState([]);
+
+  const [filters, setFilters] = useState({
+    status: "",
+    fromDate: "",
+    toDate: "",
+  });
+
+  const [page, setPage] = useState(1);
+
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
+  /* ================= LOAD DATA ================= */
   const loadData = async () => {
     setLoading(true);
     try {
       const [analyticsRes, officerRes] = await Promise.all([
-        getComplaintAnalytics(),
-        getOfficerPerformance(),
+        getComplaintAnalytics(filters),
+        getOfficerPerformance({ page, limit: 5 }),
       ]);
+
       setAnalytics(analyticsRes.data);
       setOfficerReport(officerRes.data);
     } catch (err) {
       setError("Failed to fetch reporting data");
-      console.log(err)
     } finally {
       setLoading(false);
     }
@@ -31,116 +43,184 @@ function Reports() {
 
   useEffect(() => {
     loadData();
-  }, []);
+  }, [filters, page]);
 
+  /* ================= EXPORT ================= */
   const handleExport = async () => {
-    try {
-      const res = await exportComplaintsCSV();
-      const blob = new Blob([res.data], { type: "text/csv" });
-      const url = window.URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = `complaints-report-${new Date().toLocaleDateString()}.csv`;
-      a.click();
-    } catch {
-      alert("Export failed");
-    }
+    const res = await exportComplaintsCSV(filters);
+    const blob = new Blob([res.data], { type: "text/csv" });
+
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement("a");
+
+    a.href = url;
+    a.download = `report-${Date.now()}.csv`;
+    a.click();
   };
 
+  /* ================= UI ================= */
   return (
     <MainLayout>
-      <div className="px-6 py-8 bg-gradient-to-br from-blue-100 via-slate-100 to-blue-200 min-h-screen">
-        
-         <div className="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-4">
+      <div className="min-h-screen p-6 bg-gradient-to-br from-indigo-100 via-white to-blue-100">
+
+        {/* HEADER */}
+        <div className="flex flex-col md:flex-row justify-between mb-6 gap-4">
           <div>
-            <h2 className="text-2xl font-bold text-slate-900">Reports & Analytics</h2>
-            <p className="text-slate-500 text-sm">Monitor system performance and officer efficiency.</p>
+            <h1 className="text-3xl font-bold text-slate-800">
+              📊 Reports Dashboard
+            </h1>
+            <p className="text-sm text-slate-500">
+              Track complaints & performance insights
+            </p>
           </div>
+
           <button
             onClick={handleExport}
-            className="flex items-center justify-center gap-2 px-4 py-2.5 bg-green-600 hover:bg-green-700 text-white rounded-lg text-sm font-semibold transition-all shadow-lg shadow-green-100"
+            className="bg-green-600 hover:bg-green-700 text-white px-5 py-2 rounded-lg shadow-lg"
           >
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-            </svg>
-            Export CSV Report
+            ⬇ Export CSV
           </button>
         </div>
 
+        {/* FILTER BAR */}
+        <div className="bg-white/70 backdrop-blur-lg p-4 rounded-xl shadow mb-6 flex flex-wrap gap-3">
+
+          <select
+            className="border p-2 rounded"
+            value={filters.status}
+            onChange={(e) =>
+              setFilters({ ...filters, status: e.target.value })
+            }
+          >
+            <option value="">All Status</option>
+            <option value="Pending">Pending</option>
+            <option value="Resolved">Resolved</option>
+            <option value="In Progress">In Progress</option>
+          </select>
+
+          <input
+            type="date"
+            className="border p-2 rounded"
+            value={filters.fromDate}
+            onChange={(e) =>
+              setFilters({ ...filters, fromDate: e.target.value })
+            }
+          />
+
+          <input
+            type="date"
+            className="border p-2 rounded"
+            value={filters.toDate}
+            onChange={(e) =>
+              setFilters({ ...filters, toDate: e.target.value })
+            }
+          />
+
+          <button
+            onClick={() =>
+              setFilters({ status: "", fromDate: "", toDate: "" })
+            }
+            className="bg-red-500 text-white px-3 rounded"
+          >
+            Reset
+          </button>
+        </div>
+
+        {/* ERROR */}
         {error && (
-          <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-lg mb-6">
+          <div className="bg-red-100 text-red-600 p-3 rounded mb-4">
             {error}
           </div>
         )}
 
+        {/* LOADING */}
         {loading ? (
-          <div className="flex justify-center py-20 text-slate-400 animate-pulse">Loading Analytics Data...</div>
+          <p className="text-center py-10 animate-pulse">
+            Loading dashboard...
+          </p>
         ) : (
-          <div className="space-y-10">
-            
-             <section>
-              <h3 className="text-lg font-semibold text-slate-800 mb-4 flex items-center gap-2">
-                <span className="w-1.5 h-5 bg-blue-500 rounded-full"></span>
-                Complaint Status Overview
-              </h3>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                {analytics.map((a) => (
-                  <div key={a._id} className="bg-white border border-slate-200 p-5 rounded-xl shadow-sm">
-                    <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">{a._id}</p>
-                    <p className="text-3xl font-bold text-slate-900">{a.count}</p>
-                    <div className="mt-2 w-full bg-slate-100 h-1.5 rounded-full overflow-hidden">
-                      <div className="bg-blue-500 h-full" style={{ width: '60%' }}></div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </section>
+          <>
+            {/* ANALYTICS CARDS */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+              {analytics.map((a) => (
+                <div
+                  key={a._id}
+                  className="bg-white rounded-xl shadow-lg p-5 hover:scale-105 transition"
+                >
+                  <p className="text-xs text-slate-400 uppercase">
+                    {a._id}
+                  </p>
+                  <h2 className="text-3xl font-bold text-indigo-600">
+                    {a.count}
+                  </h2>
+                </div>
+              ))}
+            </div>
 
-             <section>
-              <h3 className="text-lg font-semibold text-slate-800 mb-4 flex items-center gap-2">
-                <span className="w-1.5 h-5 bg-indigo-500 rounded-full"></span>
-                Officer Performance Leaderboard
-              </h3>
-              <div className="bg-white border border-slate-200 rounded-xl overflow-hidden shadow-sm">
-                <table className="w-full text-left border-collapse">
-                  <thead className="bg-slate-50 border-b border-slate-200">
-                    <tr>
-                      <th className="px-6 py-4 text-xs font-bold text-slate-500 uppercase">Officer Details</th>
-                      <th className="px-6 py-4 text-xs font-bold text-slate-500 uppercase">Resolved</th>
-                      <th className="px-6 py-4 text-xs font-bold text-slate-500 uppercase">Avg. Time</th>
-                      <th className="px-6 py-4 text-xs font-bold text-slate-500 uppercase text-right">Rating</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-slate-100">
-                    {officerReport.map((o) => (
-                      <tr key={o.officerId} className="hover:bg-slate-50 transition-colors">
-                        <td className="px-6 py-4">
-                          <p className="font-semibold text-slate-900 text-sm">{o.officerName}</p>
-                          <p className="text-xs text-slate-500">{o.officerEmail}</p>
-                        </td>
-                        <td className="px-6 py-4">
-                          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                            {o.resolvedCount} Cases
-                          </span>
-                        </td>
-                        <td className="px-6 py-4 text-sm text-slate-600">
-                          {o.avgResolutionTime.toFixed(1)} days
-                        </td>
-                        <td className="px-6 py-4 text-right">
-                          <div className="flex items-center justify-end gap-1">
-                            <span className="text-sm font-bold text-slate-900">{o.averageRating.toFixed(1)}</span>
-                            <svg className="w-4 h-4 text-yellow-400 fill-current" viewBox="0 0 20 20">
-                              <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                            </svg>
-                          </div>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
+            {/* OFFICER TABLE */}
+            <div className="bg-white rounded-xl shadow overflow-hidden">
+              <div className="p-4 border-b font-semibold">
+                🏆 Officer Performance
               </div>
-            </section>
-          </div>
+
+              <table className="w-full text-sm">
+                <thead className="bg-slate-100">
+                  <tr>
+                    <th className="p-3 text-left">Officer</th>
+                    <th className="p-3">Resolved</th>
+                    <th className="p-3">Time</th>
+                    <th className="p-3">Rating</th>
+                  </tr>
+                </thead>
+
+                <tbody>
+                  {officerReport.map((o) => (
+                    <tr key={o.officerId} className="border-t">
+                      <td className="p-3">
+                        <p className="font-semibold">
+                          {o.officerName}
+                        </p>
+                        <p className="text-xs text-gray-500">
+                          {o.officerEmail}
+                        </p>
+                      </td>
+
+                      <td className="p-3 text-center">
+                        {o.resolvedCount}
+                      </td>
+
+                      <td className="p-3 text-center">
+                        {o.avgResolutionTime.toFixed(1)}d
+                      </td>
+
+                      <td className="p-3 text-center">
+                        ⭐ {o.averageRating.toFixed(1)}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+
+              {/* PAGINATION */}
+              <div className="flex justify-center gap-3 p-4">
+                <button
+                  onClick={() => setPage((p) => Math.max(1, p - 1))}
+                  className="px-3 py-1 bg-slate-200 rounded"
+                >
+                  Prev
+                </button>
+
+                <span>{page}</span>
+
+                <button
+                  onClick={() => setPage((p) => p + 1)}
+                  className="px-3 py-1 bg-slate-200 rounded"
+                >
+                  Next
+                </button>
+              </div>
+            </div>
+          </>
         )}
       </div>
     </MainLayout>

@@ -28,8 +28,6 @@ import BulkNotifications from "../pages/admin/BulkNotifications";
 import AdminComplaints from "../pages/admin/Complaints";
 import Reports from "../pages/admin/Reports";
 import Feedback from "../pages/admin/Feedback";
-
-// 🔥 NEW
 import AdminHomeEditor from "../pages/admin/AdminHomeEditor";
 
 function AppRoutes() {

@@ -1,6 +1,13 @@
 import { useEffect, useState } from "react";
 import MainLayout from "../../components/layout/MainLayout";
 import { getOverviewMetrics } from "../../api/report.api";
+import {
+  FileText,
+  Clock,
+  Loader,
+  CheckCircle,
+  Star,
+} from "lucide-react";
 
 function AdminDashboard() {
   const [metrics, setMetrics] = useState(null);
@@ -25,96 +32,103 @@ function AdminDashboard() {
     fetchMetrics();
   }, []);
 
+  const cards = [
+    {
+      title: "Total Complaints",
+      value: metrics?.totalComplaints,
+      icon: FileText,
+      color: "from-blue-500 to-indigo-500",
+    },
+    {
+      title: "Pending",
+      value: metrics?.pendingComplaints,
+      icon: Clock,
+      color: "from-yellow-400 to-orange-500",
+    },
+    {
+      title: "In Progress",
+      value: metrics?.inProgressComplaints,
+      icon: Loader,
+      color: "from-cyan-500 to-blue-500",
+    },
+    {
+      title: "Resolved",
+      value: metrics?.resolvedComplaints,
+      icon: CheckCircle,
+      color: "from-green-500 to-emerald-500",
+    },
+    {
+      title: "Avg Rating",
+      value: metrics?.averageRating ?? "—",
+      icon: Star,
+      color: "from-purple-500 to-pink-500",
+    },
+  ];
+
   return (
     <MainLayout>
-       <div className="min-h-full bg-gradient-to-br from-blue-100 via-slate-100 to-blue-200">
-        <div className="px-6 py-8">
+      <div className="min-h-screen p-6 bg-gradient-to-br from-slate-100 via-blue-100 to-indigo-100">
 
-           <div className="mb-8">
-            <h1 className="text-2xl font-semibold text-slate-900">
-              Admin Dashboard
-            </h1>
-            <p className="text-sm text-slate-600 max-w-2xl">
-              System-wide overview of grievances, resolution progress, and citizen feedback.
-            </p>
-          </div>
-
-           {loading && (
-            <p className="text-slate-600 text-sm">
-              Loading dashboard data…
-            </p>
-          )}
-
-          {error && (
-            <p className="text-red-600 text-sm">
-              {error}
-            </p>
-          )}
-
-           {metrics && (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-5 mb-8">
-
-              <div className="bg-white/90 backdrop-blur-sm border border-slate-200 rounded-lg p-5">
-                <p className="text-sm text-slate-600">
-                  Total Complaints
-                </p>
-                <p className="mt-2 text-3xl font-semibold text-slate-900">
-                  {metrics.totalComplaints}
-                </p>
-              </div>
-
-              <div className="bg-white/90 backdrop-blur-sm border border-slate-200 rounded-lg p-5">
-                <p className="text-sm text-slate-600">
-                  Pending
-                </p>
-                <p className="mt-2 text-3xl font-semibold text-slate-900">
-                  {metrics.pendingComplaints}
-                </p>
-              </div>
-
-              <div className="bg-white/90 backdrop-blur-sm border border-slate-200 rounded-lg p-5">
-                <p className="text-sm text-slate-600">
-                  In Progress
-                </p>
-                <p className="mt-2 text-3xl font-semibold text-slate-900">
-                  {metrics.inProgressComplaints}
-                </p>
-              </div>
-
-              <div className="bg-white/90 backdrop-blur-sm border border-slate-200 rounded-lg p-5">
-                <p className="text-sm text-slate-600">
-                  Resolved
-                </p>
-                <p className="mt-2 text-3xl font-semibold text-slate-900">
-                  {metrics.resolvedComplaints}
-                </p>
-              </div>
-
-              <div className="bg-white/90 backdrop-blur-sm border border-slate-200 rounded-lg p-5">
-                <p className="text-sm text-slate-600">
-                  Average Rating
-                </p>
-                <p className="mt-2 text-3xl font-semibold text-slate-900">
-                  {metrics.averageRating ?? "—"}
-                </p>
-              </div>
-
-            </div>
-          )}
-
-           <div className="bg-white/90 backdrop-blur-sm border border-slate-200 rounded-lg p-6 max-w-3xl">
-            <h3 className="font-medium text-slate-900 mb-1">
-              Administrative Overview
-            </h3>
-            <p className="text-sm text-slate-600 leading-relaxed">
-              This dashboard provides a consolidated view of grievance handling
-              across departments. Administrators can monitor workload, resolution
-              efficiency, and overall citizen satisfaction to ensure transparency
-              and accountability.
-            </p>
-          </div>
-
+        {/* HEADER */}
+        <div className="mb-8">
+          <h1 className="text-3xl font-bold text-slate-800">
+            👋 Welcome Admin
+          </h1>
+          <p className="text-slate-500 text-sm mt-1">
+            Monitor complaints, track performance, and manage system efficiently.
+          </p>
         </div>
+
+        {/* LOADING */}
+        {loading && (
+          <p className="text-slate-500 animate-pulse">
+            Loading dashboard...
+          </p>
+        )}
+
+        {/* ERROR */}
+        {error && (
+          <p className="text-red-500">{error}</p>
+        )}
+
+        {/* CARDS */}
+        {metrics && (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6 mb-10">
+            {cards.map((card, i) => {
+              const Icon = card.icon;
+              return (
+                <div
+                  key={i}
+                  className={`rounded-2xl p-5 text-white shadow-lg bg-gradient-to-r ${card.color} hover:scale-105 transition`}
+                >
+                  <div className="flex items-center justify-between">
+                    <Icon size={28} />
+                    <span className="text-sm opacity-80">
+                      {card.title}
+                    </span>
+                  </div>
+
+                  <h2 className="text-3xl font-bold mt-4">
+                    {card.value ?? 0}
+                  </h2>
+                </div>
+              );
+            })}
+          </div>
+        )}
+
+        {/* INFO CARD */}
+        <div className="bg-white/80 backdrop-blur-md border border-slate-200 rounded-xl p-6 max-w-3xl shadow">
+          <h3 className="text-lg font-semibold text-slate-800">
+            📊 System Overview
+          </h3>
+          <p className="text-sm text-slate-600 mt-2 leading-relaxed">
+            This dashboard provides insights into grievance handling across departments.
+            Monitor pending cases, track resolutions, and evaluate citizen satisfaction
+            to improve transparency and efficiency.
+          </p>
+        </div>
+
       </div>
     </MainLayout>
   );

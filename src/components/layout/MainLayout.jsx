@@ -1,9 +1,13 @@
 import Navbar from "./Navbar";
 import Sidebar from "./Sidebar";
 import { useAuth } from "../../contexts/AuthContext";
+import { useState } from "react";
+
 
 function MainLayout({ children }) {
-  const { loading } = useAuth();
+  const [collapsed, setCollapsed] = useState(false);
+
+   const { loading } = useAuth();
 
   if (loading) {
     return (
@@ -14,15 +18,19 @@ function MainLayout({ children }) {
   }
 
   return (
-    <div className="flex min-h-screen bg-slate-100">
-      <Sidebar />
+    <div className="flex bg-slate-100 min-h-screen">
 
-      <div className="flex flex-col flex-1">
-        <Navbar />
+      {/* Sidebar */}
+      <Sidebar collapsed={collapsed} setCollapsed={setCollapsed} />
 
-        <main className="flex-1 overflow-y-auto p-6">
-          {children}
-        </main>
+      {/* Main Area */}
+      <div
+        className={`flex-1 transition-all duration-300 ${
+          collapsed ? "ml-16" : "ml-64"
+        }`}
+      >
+        <Navbar collapsed={collapsed} />
+        <main className="p-6">{children}</main>
       </div>
     </div>
   );

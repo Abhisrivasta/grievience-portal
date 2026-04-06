@@ -5,7 +5,7 @@ export const submitFeedback = async (data) => {
   return res.data;
 };
 
-export const getAllFeedback = async () => {
-  const res = await api.get("/feedback");
+export const getAllFeedback = async (params) => {
+  const res = await api.get("/feedback", { params });
   return res.data;
 };

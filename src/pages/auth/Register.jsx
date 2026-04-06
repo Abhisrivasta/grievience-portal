@@ -46,150 +46,129 @@ function Register() {
 
       navigate("/login");
     } catch (err) {
-      setError(
-        err.response?.data?.message || "Registration failed"
-      );
+      setError(err.response?.data?.message || "Registration failed");
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-indigo-900 via-slate-900 to-blue-900 flex items-center justify-center px-6">
-      
-      <div className="w-full max-w-5xl bg-white rounded-3xl shadow-2xl grid grid-cols-1 md:grid-cols-2 overflow-hidden">
-        
-        <div className="hidden md:flex flex-col justify-center bg-gradient-to-br from-blue-600 to-indigo-700 text-white p-10">
-          <h2 className="text-4xl font-extrabold mb-4">
-            Join the Grievance Portal
-          </h2>
+    <div className="relative min-h-screen flex items-center justify-center px-6 bg-black text-white overflow-hidden">
 
-          <p className="text-blue-100 mb-8">
-            Raise complaints, track progress, and communicate directly with
-            concerned authorities through a transparent digital system.
-          </p>
+      {/* 🔥 Background Glow */}
+      <div className="absolute w-[400px] h-[400px] bg-blue-500/30 blur-[120px] top-[-100px] left-[-100px]"></div>
+      <div className="absolute w-[400px] h-[400px] bg-purple-500/30 blur-[120px] bottom-[-100px] right-[-100px]"></div>
 
-          <ul className="space-y-4 text-blue-100">
-            <li>✔ Easy complaint registration</li>
-            <li>✔ Real-time status updates</li>
-            <li>✔ Department-wise resolution</li>
-            <li>✔ Notifications & history</li>
-          </ul>
-        </div>
+      {/* 🔥 Card */}
+      <div className="relative z-10 w-full max-w-lg bg-white/10 backdrop-blur-xl border border-white/10 rounded-3xl shadow-2xl p-8">
 
-        <div className="p-8 md:p-10">
-          <h3 className="text-3xl font-bold text-gray-800">
-            Citizen Registration
-          </h3>
-          <p className="text-gray-500 mt-1">
-            Create your account to get started
-          </p>
+        {/* 🔙 Home Link */}
+        <Link
+          to="/"
+          className="text-sm text-gray-300 hover:text-white transition"
+        >
+          ← Back to Home
+        </Link>
 
-          {error && (
-            <div className="mt-4 bg-red-100 text-red-700 text-sm px-4 py-2 rounded-lg">
-              {error}
-            </div>
-          )}
+        <h2 className="text-3xl font-bold mt-4">
+          Create Account 🚀
+        </h2>
 
-          <form onSubmit={handleSubmit} className="mt-6 space-y-4">
-            
-            <div>
-              <label className="text-sm font-medium text-gray-700">
-                Full Name
-              </label>
+        <p className="text-gray-400 text-sm mt-1">
+          Join the grievance system and raise your voice
+        </p>
+
+        {/* Error */}
+        {error && (
+          <div className="mt-4 bg-red-500/20 border border-red-500 text-red-300 text-sm px-4 py-2 rounded-lg">
+            {error}
+          </div>
+        )}
+
+        <form onSubmit={handleSubmit} className="mt-6 space-y-4">
+
+          {/* Name */}
+          <input
+            type="text"
+            name="name"
+            value={form.name}
+            onChange={handleChange}
+            placeholder="Full Name"
+            className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg text-white placeholder-gray-400 focus:ring-2 focus:ring-blue-500 outline-none"
+          />
+
+          {/* Email */}
+          <input
+            type="email"
+            name="email"
+            value={form.email}
+            onChange={handleChange}
+            placeholder="Email Address"
+            className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg text-white placeholder-gray-400 focus:ring-2 focus:ring-blue-500 outline-none"
+          />
+
+          {/* Password */}
+          <input
+            type="password"
+            name="password"
+            value={form.password}
+            onChange={handleChange}
+            placeholder="Password"
+            className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg text-white placeholder-gray-400 focus:ring-2 focus:ring-blue-500 outline-none"
+          />
+
+          {/* Location */}
+          <div className="border-t border-white/10 pt-4">
+            <p className="text-sm text-gray-400 mb-2">Location (Optional)</p>
+
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
               <input
                 type="text"
-                name="name"
-                value={form.name}
+                name="state"
+                value={form.state}
                 onChange={handleChange}
-                className="w-full mt-1 px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"
-                placeholder="John Doe"
-                required
+                placeholder="State"
+                className="px-3 py-2 bg-white/5 border border-white/10 rounded-lg text-white"
               />
-            </div>
-
-            <div>
-              <label className="text-sm font-medium text-gray-700">
-                Email Address
-              </label>
               <input
-                type="email"
-                name="email"
-                value={form.email}
+                type="text"
+                name="city"
+                value={form.city}
                 onChange={handleChange}
-                className="w-full mt-1 px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"
-                placeholder="you@example.com"
-                required
+                placeholder="City"
+                className="px-3 py-2 bg-white/5 border border-white/10 rounded-lg text-white"
               />
-            </div>
-
-            <div>
-              <label className="text-sm font-medium text-gray-700">
-                Password
-              </label>
               <input
-                type="password"
-                name="password"
-                value={form.password}
+                type="text"
+                name="ward"
+                value={form.ward}
                 onChange={handleChange}
-                className="w-full mt-1 px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"
-                placeholder="••••••••"
-                required
+                placeholder="Ward"
+                className="px-3 py-2 bg-white/5 border border-white/10 rounded-lg text-white"
               />
             </div>
+          </div>
 
-            <div className="pt-3 border-t">
-              <p className="text-sm font-semibold text-gray-600 mb-2">
-                Location (Optional)
-              </p>
+          {/* Button */}
+          <button
+            type="submit"
+            disabled={loading}
+            className="w-full mt-4 bg-gradient-to-r from-blue-600 to-purple-600 hover:scale-105 transition text-white font-semibold py-3 rounded-lg disabled:opacity-50"
+          >
+            {loading ? "Creating..." : "Create Account"}
+          </button>
+        </form>
 
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                <input
-                  type="text"
-                  name="state"
-                  value={form.state}
-                  onChange={handleChange}
-                  placeholder="State"
-                  className="px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"
-                />
-                <input
-                  type="text"
-                  name="city"
-                  value={form.city}
-                  onChange={handleChange}
-                  placeholder="City"
-                  className="px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"
-                />
-                <input
-                  type="text"
-                  name="ward"
-                  value={form.ward}
-                  onChange={handleChange}
-                  placeholder="Ward"
-                  className="px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"
-                />
-              </div>
-            </div>
-
-            <button
-              type="submit"
-              disabled={loading}
-              className="w-full mt-4 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 rounded-lg transition disabled:opacity-60"
-            >
-              {loading ? "Creating Account..." : "Create Account"}
-            </button>
-          </form>
-
-          <p className="text-center text-sm text-gray-600 mt-6">
-            Already registered?{" "}
-            <Link
-              to="/login"
-              className="text-blue-600 font-medium hover:underline"
-            >
-              Login here
-            </Link>
-          </p>
-        </div>
+        {/* Login Link */}
+        <p className="text-center text-sm text-gray-400 mt-6">
+          Already registered?{" "}
+          <Link
+            to="/login"
+            className="text-blue-400 hover:underline"
+          >
+            Login
+          </Link>
+        </p>
       </div>
     </div>
   );

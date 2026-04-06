@@ -14,7 +14,7 @@ export const sidebarLinks = {
     { path: "/admin", label: "Dashboard" },
 
     // 🔥 IMPORTANT ADDITION
-    { path: "/admin/home", label: "Home Page (CMS)" },
+    { path: "/admin/home", label: "Home Page" },
 
     { path: "/admin/departments", label: "Departments" },
     { path: "/admin/officers", label: "Officers" },

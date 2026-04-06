@@ -1,39 +1,45 @@
-import { useState } from "react";
 import { NavLink } from "react-router-dom";
 import { useAuth } from "../../contexts/AuthContext";
 import { sidebarLinks } from "../../utils/sidebarLinks";
-import { ChevronLeft, ChevronRight, User } from "lucide-react";
+import {
+  ChevronLeft,
+  ChevronRight,
+  User,
+} from "lucide-react";
 
-function Sidebar() {
-  const { user } = useAuth();
-  const [collapsed, setCollapsed] = useState(false);
+function Sidebar({ collapsed, setCollapsed }) { 
+   const { user } = useAuth();
 
   if (!user) {
     return (
-      <aside className="w-60 bg-blue-950 text-white flex items-center justify-center">
-        <p className="text-sm text-blue-200">Loading...</p>
+      <aside className="fixed top-0 left-0 h-screen w-64 bg-black flex items-center justify-center text-gray-400">
+        Loading...
       </aside>
     );
   }
 
   const base =
-    "flex items-center gap-3 px-3 py-2 rounded-md transition-colors duration-150";
+    "group relative flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-300";
 
-  const active = "bg-blue-900 text-white font-medium";
+  const active =
+    "bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-lg scale-[1.02]";
 
   const inactive =
-    "text-blue-200 hover:bg-blue-900/60 hover:text-white";
+    "text-gray-300 hover:bg-white/10 hover:text-white";
 
   return (
     <aside
-      className={`h-screen bg-blue-950 border-r border-blue-900 transition-all duration-300 ${
-        collapsed ? "w-16" : "w-60"
-      }`}
+      className={`fixed top-0 left-0 h-screen flex flex-col 
+      bg-black/80 backdrop-blur-2xl border-r border-white/10
+      transition-all duration-300
+      ${collapsed ? "w-16" : "w-64"}`}
     >
-      <div className="flex items-center justify-between px-4 py-5 border-b border-blue-900">
+
+      {/* 🔥 HEADER */}
+      <div className="flex items-center justify-between px-4 py-5 border-b border-white/10">
         {!collapsed && (
           <div>
-            <p className="text-[11px] uppercase text-blue-300">
+            <p className="text-[10px] uppercase tracking-wider text-blue-400">
               Government Portal
             </p>
             <h1 className="text-sm font-semibold text-white">
@@ -44,13 +50,37 @@ function Sidebar() {
 
         <button
           onClick={() => setCollapsed(!collapsed)}
-          className="text-blue-300 hover:text-white"
+          className="p-2 rounded-lg bg-white/10 hover:bg-white/20 text-white transition"
         >
-          {collapsed ? <ChevronRight size={18} /> : <ChevronLeft size={18} />}
+          {collapsed ? (
+            <ChevronRight size={16} />
+          ) : (
+            <ChevronLeft size={16} />
+          )}
         </button>
       </div>
 
-      <nav className="px-2 py-4 space-y-1 text-sm">
+      {/* 🔥 PROFILE */}
+      {!collapsed && (
+        <div className="mx-3 mt-4 p-3 rounded-2xl bg-white/5 border border-white/10 flex items-center gap-3 hover:bg-white/10 transition">
+          <div className="w-10 h-10 flex items-center justify-center rounded-full bg-gradient-to-br from-blue-500 to-purple-500 text-white font-semibold shadow">
+            {user.name?.[0] || "U"}
+          </div>
+          <div className="overflow-hidden">
+            <p className="text-sm font-medium text-white truncate">
+              {user.name || "User"}
+            </p>
+            <p className="text-xs text-blue-400 capitalize">
+              {user.role}
+            </p>
+          </div>
+        </div>
+      )}
+
+      {/* 🔥 NAVIGATION */}
+      <div className="flex-1 overflow-y-auto px-2 py-4 space-y-1 text-sm">
+
+        {/* Profile */}
         <NavLink
           to="/profile"
           className={({ isActive }) =>
@@ -58,11 +88,20 @@ function Sidebar() {
           }
         >
           <User size={18} />
+
           {!collapsed && <span>My Profile</span>}
+
+          {/* Tooltip */}
+          {collapsed && (
+            <span className="absolute left-14 bg-black text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition">
+              My Profile
+            </span>
+          )}
         </NavLink>
 
-        <div className="my-4 border-t border-blue-900" />
+        <div className="my-3 border-t border-white/10" />
 
+        {/* Dynamic Links */}
         {sidebarLinks[user.role]?.map((item) => (
           <NavLink
             key={item.path}
@@ -73,9 +112,38 @@ function Sidebar() {
           >
             {item.icon && <item.icon size={18} />}
             {!collapsed && <span>{item.label}</span>}
+
+            {/* Tooltip */}
+            {collapsed && (
+              <span className="absolute left-14 bg-black text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition">
+                {item.label}
+              </span>
+            )}
           </NavLink>
         ))}
-      </nav>
+      </div>
+
+      {/* 🔥 FOOTER */}
+      {!collapsed && (
+        <div className="p-3 border-t border-white/10">
+          <div className="rounded-2xl bg-gradient-to-br from-blue-600/20 to-purple-600/20 border border-white/10 p-3 text-xs text-gray-300">
+            <p className="font-medium">🚀 Version 1.0</p>
+            <p className="mt-1 text-white text-sm font-semibold">
+              Smart Grievance System
+            </p>
+            <p className="text-[11px] text-gray-400 mt-1">
+              Fast • Transparent • Reliable
+            </p>
+          </div>
+        </div>
+      )}
+
+      {/* Collapsed Footer */}
+      {collapsed && (
+        <div className="p-3 text-center text-blue-400 text-lg">
+          🚀
+        </div>
+      )}
     </aside>
   );
 }
