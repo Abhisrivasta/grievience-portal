@@ -9,13 +9,13 @@ export const AuthProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
 
   const updateUser = (userData) => {
-    if (!userData || !userData.role) {
-      console.error("Invalid user data:", userData);
-      return;
-    }
+    if (!userData) return;
 
-    localStorage.setItem("user", JSON.stringify(userData));
-    setUser(userData);
+    setUser((prev) => {
+      const updatedUser = { ...prev, ...userData };
+      localStorage.setItem("user", JSON.stringify(updatedUser));
+      return updatedUser;
+    });
   };
 
   const login = (data) => {
@@ -34,6 +34,7 @@ export const AuthProvider = ({ children }) => {
       const token = localStorage.getItem("token");
       const savedUser = localStorage.getItem("user");
 
+      // Restore user from localStorage
       if (savedUser && savedUser !== "undefined" && savedUser !== "null") {
         try {
           const parsedUser = JSON.parse(savedUser);
@@ -52,7 +53,8 @@ export const AuthProvider = ({ children }) => {
       try {
         const res = await getProfile();
 
-        const userData = res.data.user || res.data;
+        // flexible handling
+        const userData = res?.data?.user || res?.data || res;
 
         updateUser(userData);
       } catch (err) {
@@ -68,11 +70,19 @@ export const AuthProvider = ({ children }) => {
 
   return (
     <AuthContext.Provider
-      value={{ user, login, logout, loading }}
+      value={{
+        user,
+        setUser,     
+        updateUser,  
+        login,
+        logout,
+        loading,
+      }}
     >
       {children}
     </AuthContext.Provider>
   );
 };
 
+// ✅ Custom hook
 export const useAuth = () => useContext(AuthContext);

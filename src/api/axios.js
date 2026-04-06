@@ -6,6 +6,7 @@ const BASE_URL =
     ? "http://localhost:5000/api"
     : "https://grievience-portal-backend-production.up.railway.app/api";
 
+
 const api = axios.create({
   baseURL: BASE_URL,
   headers: {
@@ -13,10 +14,11 @@ const api = axios.create({
   },
 });
 
-// 🔐 Attach token
+// 🔐 Attach token + LOG REQUEST
 api.interceptors.request.use((config) => {
   const token = localStorage.getItem("token");
 
+  
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
   }

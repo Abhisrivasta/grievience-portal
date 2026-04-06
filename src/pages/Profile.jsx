@@ -3,18 +3,25 @@ import { useAuth } from "../contexts/AuthContext";
 import MainLayout from "../components/layout/MainLayout";
 import { updateProfile } from "../api/auth.api";
 
+const BASE_URL = import.meta.env.VITE_API_URL;
+
 function Profile() {
   const { user, updateUser, loading } = useAuth();
+
   const [isEditing, setIsEditing] = useState(false);
   const [updating, setUpdating] = useState(false);
-  
+
   const [name, setName] = useState(user?.name || "");
+  const [city, setCity] = useState(user?.location?.city || "");
+  const [state, setState] = useState(user?.location?.state || "");
+  const [ward, setWard] = useState(user?.location?.ward || "");
+
   const [photoPreview, setPhotoPreview] = useState(null);
+
   const fileInputRef = useRef(null);
 
-  const getInitials = (name) => {
-    return name?.split(" ").map(n => n[0]).join("").toUpperCase() || "U";
-  };
+  const getInitials = (name) =>
+    name?.split(" ").map((n) => n[0]).join("").toUpperCase() || "U";
 
   const handlePhotoChange = (e) => {
     const file = e.target.files[0];
@@ -25,112 +32,193 @@ function Profile() {
 
   const handleSave = async () => {
     setUpdating(true);
+
     const formData = new FormData();
     formData.append("name", name);
-    
+    formData.append("city", city);
+    formData.append("state", state);
+    formData.append("ward", ward);
+
     if (fileInputRef.current?.files[0]) {
       formData.append("profilePhoto", fileInputRef.current.files[0]);
     }
 
     try {
-      const res = await updateProfile(formData);
-      updateUser(res.data); 
+      const updatedUser = await updateProfile(formData);
+      updateUser(updatedUser);
+
       setIsEditing(false);
       setPhotoPreview(null);
-      alert("Profile Updated!");
     } catch (err) {
-      alert("Update Failed: " + (err.response?.data?.message || err.message));
+      console.error(err);
     } finally {
       setUpdating(false);
     }
   };
 
-  if (loading) return <div className="p-10 text-center">Loading...</div>;
+  if (loading) {
+    return (
+      <MainLayout>
+        <div className="flex justify-center items-center h-40 text-gray-500">
+          Loading profile...
+        </div>
+      </MainLayout>
+    );
+  }
 
-  return (
-    <MainLayout>
-      <div className="min-h-screen bg-slate-50/50 pb-12">
-        <div className="h-48 bg-gradient-to-r from-blue-600 to-indigo-700 w-full" />
+return (
+  <MainLayout>
+    <div className="max-w-5xl mx-auto p-6 space-y-6">
 
-        <div className="max-w-4xl mx-auto px-6 -mt-24">
-          <div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
-            <div className="p-8 flex flex-col md:flex-row items-center gap-6">
+      {/* 🔥 HERO */}
+      <div className="rounded-2xl bg-gradient-to-r from-blue-600 to-indigo-600 p-6 text-white shadow-lg">
+        <div className="flex items-center gap-5">
+
+          {/* AVATAR */}
+          <div className="relative group">
+            <div className="h-20 w-20 rounded-2xl bg-white/20 flex items-center justify-center text-2xl font-bold overflow-hidden">
               
-              <div className="relative group">
-                <div className="h-28 w-28 rounded-2xl bg-indigo-600 flex items-center justify-center text-white text-3xl font-bold shadow-xl border-4 border-white overflow-hidden">
-                  {photoPreview ? (
-                    <img src={photoPreview} className="h-full w-full object-cover" alt="Preview" />
-                  ) : user?.profilePhoto ? (
-                    <img src={`http://localhost:5000${user.profilePhoto}`} className="h-full w-full object-cover" alt="Profile" />
-                  ) : (
-                    getInitials(user?.name)
-                  )}
-                </div>
-                
-                {isEditing && (
-                  <button 
-                    onClick={() => fileInputRef.current.click()}
-                    className="absolute inset-0 bg-black/40 flex items-center justify-center rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity text-white"
-                  >
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
-                    </svg>
-                  </button>
-                )}
-                <input type="file" ref={fileInputRef} hidden onChange={handlePhotoChange} accept="image/*" />
-              </div>
-
-              <div className="text-center md:text-left flex-1">
-                {isEditing ? (
-                  <input 
-                    type="text"
-                    value={name} 
-                    onChange={(e) => setName(e.target.value)}
-                    className="text-2xl font-bold border-b-2 border-blue-600 outline-none w-full md:w-auto"
-                  />
-                ) : (
-                  <h2 className="text-2xl font-bold text-slate-900">{user?.name}</h2>
-                )}
-                <p className="text-slate-500">{user?.email}</p>
-              </div>
-
-              <div className="flex gap-2">
-                {isEditing ? (
-                  <>
-                    <button onClick={handleSave} disabled={updating} className="px-5 py-2 bg-blue-600 text-white rounded-xl text-sm font-bold shadow-md active:scale-95 disabled:opacity-50">
-                      {updating ? "Saving..." : "Save"}
-                    </button>
-                    <button onClick={() => {setIsEditing(false); setPhotoPreview(null);}} className="px-5 py-2 bg-slate-100 text-slate-600 rounded-xl text-sm font-bold">
-                      Cancel
-                    </button>
-                  </>
-                ) : (
-                  <button onClick={() => setIsEditing(true)} className="px-6 py-2.5 bg-slate-900 text-white rounded-xl text-sm font-bold shadow-lg active:scale-95">
-                    Edit Profile
-                  </button>
-                )}
-              </div>
+              {photoPreview ? (
+                <img src={photoPreview} className="h-full w-full object-cover" />
+              ) : user?.profilePhoto ? (
+                <img
+                  src={`${BASE_URL}${user.profilePhoto}`}
+                  className="h-full w-full object-cover"
+                />
+              ) : (
+                getInitials(user?.name)
+              )}
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 border-t border-slate-100 bg-slate-50/50">
-               <div className="p-6 text-center border-r border-slate-100">
-                  <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-1">Role</p>
-                  <p className="font-bold text-slate-800 capitalize">{user?.role}</p>
-               </div>
-               <div className="p-6 text-center border-r border-slate-100">
-                  <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-1">Status</p>
-                  <p className="font-bold text-green-600">Active</p>
-               </div>
-               <div className="p-6 text-center">
-                  <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-1">City</p>
-                  <p className="font-bold text-slate-800">{user?.location?.city || "Not Set"}</p>
-               </div>
-            </div>
+            {/* ✅ FIX: Change photo only in edit */}
+            {isEditing && (
+              <button
+                onClick={() => fileInputRef.current.click()}
+                className="absolute inset-0 bg-black/40 text-white text-xs flex items-center justify-center rounded-2xl opacity-0 group-hover:opacity-100 transition"
+              >
+                Change
+              </button>
+            )}
+
+            <input
+              type="file"
+              ref={fileInputRef}
+              hidden
+              onChange={handlePhotoChange}
+            />
+          </div>
+
+          {/* 🔥 NAME + EMAIL */}
+          <div className="flex-1">
+
+            {/* ✅ FIX: Editable name */}
+            {isEditing ? (
+              <input
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                className="text-2xl font-semibold bg-transparent border-b border-white/50 outline-none w-full"
+              />
+            ) : (
+              <h2 className="text-2xl font-semibold">{user?.name}</h2>
+            )}
+
+            <p className="text-blue-100">{user?.email}</p>
+          </div>
+
+          {/* 🔥 ACTION BUTTONS */}
+          <div className="flex gap-2">
+
+            {isEditing ? (
+              <>
+                <button
+                  onClick={handleSave}
+                  disabled={updating}
+                  className="px-4 py-2 bg-black text-white rounded-lg hover:bg-gray-900"
+                >
+                  {updating ? "Saving..." : "Save"}
+                </button>
+
+                {/* ✅ FIX: Cancel button */}
+                <button
+                  onClick={() => {
+                    setIsEditing(false);
+                    setPhotoPreview(null);
+                  }}
+                  className="px-4 py-2 bg-white text-blue-600 rounded-lg hover:bg-gray-100"
+                >
+                  Cancel
+                </button>
+              </>
+            ) : (
+              <button
+                onClick={() => setIsEditing(true)}
+                className="px-4 py-2 bg-white text-blue-600 rounded-lg font-medium hover:bg-gray-100"
+              >
+                Edit
+              </button>
+            )}
+
           </div>
         </div>
       </div>
-    </MainLayout>
-  );
+
+      {/* 🔥 MAIN CARD */}
+      <div className="bg-white rounded-2xl shadow-md border border-slate-200 p-6">
+
+        {/* FORM */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+
+          {[
+            { label: "City", value: city, setter: setCity },
+            { label: "State", value: state, setter: setState },
+            { label: "Ward", value: ward, setter: setWard },
+          ].map((field, i) => (
+            <div key={i}>
+              <label className="text-sm text-slate-500">
+                {field.label}
+              </label>
+
+              <input
+                value={field.value}
+                onChange={(e) => field.setter(e.target.value)}
+                disabled={!isEditing}
+                className="w-full mt-1 border border-slate-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 outline-none disabled:bg-slate-100"
+              />
+            </div>
+          ))}
+
+        </div>
+
+        {/* INFO CARDS */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-8">
+
+          <div className="bg-slate-50 rounded-xl p-4 text-center">
+            <p className="text-sm text-slate-500">Role</p>
+            <p className="text-lg font-semibold text-slate-800 capitalize">
+              {user?.role}
+            </p>
+          </div>
+
+          <div className="bg-green-50 rounded-xl p-4 text-center">
+            <p className="text-sm text-green-600">Status</p>
+            <p className="text-lg font-semibold text-green-700">
+              Active
+            </p>
+          </div>
+
+          <div className="bg-slate-50 rounded-xl p-4 text-center">
+            <p className="text-sm text-slate-500">Joined</p>
+            <p className="text-lg font-semibold text-slate-800">
+              {new Date(user?.createdAt).toLocaleDateString()}
+            </p>
+          </div>
+
+        </div>
+
+      </div>
+    </div>
+  </MainLayout>
+);
 }
 
 export default Profile;
