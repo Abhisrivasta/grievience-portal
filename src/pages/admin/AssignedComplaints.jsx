@@ -1,4 +1,9 @@
 import { useEffect, useState } from "react";
+import { 
+  Users, Building2, Send, RefreshCw, 
+  Search, ShieldAlert, CheckCircle2, 
+  Loader2, AlertCircle, Ticket
+} from "lucide-react";
 import MainLayout from "../../components/layout/MainLayout";
 import { getAllComplaints, assignComplaint } from "../../api/complaint.api";
 import { getDepartments } from "../../api/department.api";
@@ -10,7 +15,6 @@ function AssignComplaints() {
   const [officers, setOfficers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-  
   const [selectedData, setSelectedData] = useState({});
 
   const loadData = async () => {
@@ -20,19 +24,20 @@ function AssignComplaints() {
       const deptRes = await getDepartments();
       const officerRes = await getOfficers();
 
-      setComplaints(complaintsData.filter((c) => !c.assignedOfficer));
-      setDepartments(deptRes.data);
-      setOfficers(officerRes.data);
+      // Backend response logic handle kar rahe hain (data array check)
+      const rawComplaints = Array.isArray(complaintsData) ? complaintsData : complaintsData.data || [];
+      setComplaints(rawComplaints.filter((c) => !c.assignedOfficer));
+      
+      setDepartments(deptRes.data || []);
+      setOfficers(officerRes.data || []);
     } catch {
-      setError("Failed to load assignment queue");
+      setError("Failed to load assignment queue. Please check server connection.");
     } finally {
       setLoading(false);
     }
   };
 
-  useEffect(() => {
-    loadData();
-  }, []);
+  useEffect(() => { loadData(); }, []);
 
   const handleSelectChange = (id, field, value) => {
     setSelectedData(prev => ({
@@ -45,13 +50,14 @@ function AssignComplaints() {
     const { officerId, departmentId } = selectedData[complaintId] || {};
 
     if (!officerId || !departmentId) {
-      alert("Please select both an officer and a department");
+      alert("⚠️ Select both Officer and Department to proceed.");
       return;
     }
 
     try {
       await assignComplaint(complaintId, { officerId, departmentId });
-      loadData();
+      // Success visual feedback ke liye hum local state se turant remove karenge
+      setComplaints(prev => prev.filter(c => c._id !== complaintId));
       const newSelections = { ...selectedData };
       delete newSelections[complaintId];
       setSelectedData(newSelections);
@@ -62,92 +68,111 @@ function AssignComplaints() {
 
   return (
     <MainLayout>
-      <div className="px-6 py-8 bg-slate-50 min-h-screen">
+      <div className="max-w-7xl mx-auto p-4 md:p-8 space-y-10 animate-in fade-in duration-700">
         
-         <div className="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-4">
-          <div>
-            <h2 className="text-2xl font-bold text-slate-900">Assign Complaints</h2>
-            <p className="text-slate-500 text-sm italic">
-              There are <span className="text-blue-600 font-bold">{complaints.length}</span> complaints waiting for assignment.
+        {/* --- HEADER --- */}
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 border-b border-slate-200 pb-8">
+          <div className="space-y-1">
+            <h1 className="text-3xl font-black text-slate-900 tracking-tight flex items-center gap-3">
+              <ShieldAlert className="text-indigo-600" size={32} />
+              Assignment Queue
+            </h1>
+            <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] flex items-center gap-2">
+               Queue Status: <span className="text-blue-600 font-black">{complaints.length} Pending Tasks</span>
             </p>
           </div>
+          
           <button 
             onClick={loadData}
-            className="p-2 bg-white border border-slate-200 rounded-lg hover:bg-slate-50 transition-colors"
-            title="Refresh List"
+            disabled={loading}
+            className="flex items-center gap-2 px-5 py-2.5 bg-white border border-slate-200 rounded-2xl text-[10px] font-black uppercase tracking-widest text-slate-600 hover:bg-slate-50 transition-all shadow-sm active:scale-95"
           >
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-slate-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-            </svg>
+            <RefreshCw size={14} className={loading ? "animate-spin" : ""} />
+            Sync Queue
           </button>
         </div>
 
         {error && (
-          <div className="bg-red-50 text-red-600 p-4 rounded-xl border border-red-100 mb-6 text-sm">
-            {error}
+          <div className="bg-rose-50 border border-rose-100 p-4 rounded-2xl text-rose-600 text-xs font-bold flex items-center gap-3 italic">
+            <AlertCircle size={18} /> {error}
           </div>
         )}
 
+        {/* --- MAIN CONTENT --- */}
         {loading ? (
-          <div className="flex justify-center py-20 text-slate-400 italic">Syncing with server...</div>
+          <div className="flex flex-col items-center justify-center py-20 gap-4">
+            <Loader2 className="w-10 h-10 text-indigo-600 animate-spin" />
+            <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Accessing Secure Records...</p>
+          </div>
         ) : (
-          <div className="grid grid-cols-1 gap-4 max-w-5xl mx-auto">
+          <div className="grid grid-cols-1 gap-6 max-w-6xl mx-auto">
             {complaints.length === 0 ? (
-              <div className="bg-white border-2 border-dashed border-slate-200 rounded-2xl p-20 text-center">
-                <div className="inline-flex items-center justify-center w-16 h-16 bg-green-50 text-green-500 rounded-full mb-4">
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                  </svg>
+              <div className="bg-white border-2 border-dashed border-slate-200 rounded-[3rem] p-20 text-center space-y-4">
+                <div className="w-20 h-20 bg-emerald-50 text-emerald-500 rounded-[2rem] flex items-center justify-center mx-auto shadow-inner shadow-emerald-100">
+                  <CheckCircle2 size={40} />
                 </div>
-                <h3 className="text-lg font-bold text-slate-900">All caught up!</h3>
-                <p className="text-slate-500">No unassigned complaints found in the system.</p>
+                <h3 className="text-xl font-black text-slate-900">Queue is Clear</h3>
+                <p className="text-sm text-slate-500 font-medium italic">"No unassigned grievances found in the system. High Five! ✋"</p>
               </div>
             ) : (
               complaints.map((c) => (
-                <div key={c._id} className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm flex flex-col lg:flex-row lg:items-center gap-6">
+                <div key={c._id} className="bg-white border border-slate-200 rounded-[2.5rem] p-6 md:p-8 shadow-xl shadow-slate-200/40 flex flex-col lg:flex-row lg:items-center gap-8 group hover:border-indigo-200 transition-all duration-500">
                   
-                   <div className="flex-1 border-b lg:border-b-0 lg:border-r border-slate-100 pb-4 lg:pb-0 lg:pr-6">
-                    <span className="text-[10px] font-bold text-blue-600 bg-blue-50 px-2 py-0.5 rounded uppercase tracking-wider mb-2 inline-block">
-                      {c.category}
-                    </span>
-                    <h4 className="text-lg font-bold text-slate-900">{c.title}</h4>
-                    <p className="text-sm text-slate-500 mt-1">ID: {c._id.substring(0, 8)}...</p>
+                  {/* Complaint Snapshot */}
+                  <div className="flex-1 space-y-3 lg:border-r border-slate-100 lg:pr-8">
+                    <div className="flex items-center gap-3">
+                       <span className="text-[9px] font-black text-indigo-600 bg-indigo-50 border border-indigo-100 px-3 py-1 rounded-full uppercase tracking-widest">
+                        {c.category}
+                      </span>
+                      <span className="text-[9px] font-bold text-slate-400 uppercase">#{c._id.slice(-6)}</span>
+                    </div>
+                    <h4 className="text-xl font-black text-slate-800 tracking-tight leading-tight group-hover:text-indigo-600 transition-colors">{c.title}</h4>
+                    <p className="text-xs font-medium text-slate-500 italic line-clamp-1">"{c.description}"</p>
                   </div>
 
-                   <div className="flex flex-col sm:flex-row items-end gap-3 lg:w-3/5">
-                    <div className="w-full">
-                      <label className="text-[10px] font-bold text-slate-400 uppercase ml-1 mb-1 block">Officer</label>
+                  {/* Assignment Controls */}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:flex items-end gap-4 lg:w-[60%]">
+                    
+                    {/* Officer Dropdown */}
+                    <div className="space-y-1.5 flex-1">
+                      <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest ml-1 flex items-center gap-1">
+                        <Users size={10} className="text-indigo-500" /> Dispatch To Officer
+                      </label>
                       <select 
                         value={selectedData[c._id]?.officerId || ""}
                         onChange={(e) => handleSelectChange(c._id, "officerId", e.target.value)}
-                        className="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none transition-all"
+                        className="w-full bg-slate-50 border border-slate-100 rounded-2xl px-4 py-3 text-xs font-bold text-slate-700 outline-none focus:ring-4 focus:ring-indigo-500/5 transition-all appearance-none cursor-pointer"
                       >
-                        <option value="">Select Officer</option>
+                        <option value="">Select Official</option>
                         {officers.map((o) => (
                           <option key={o._id} value={o._id}>{o.name}</option>
                         ))}
                       </select>
                     </div>
 
-                    <div className="w-full">
-                      <label className="text-[10px] font-bold text-slate-400 uppercase ml-1 mb-1 block">Dept</label>
+                    {/* Department Dropdown */}
+                    <div className="space-y-1.5 flex-1">
+                      <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest ml-1 flex items-center gap-1">
+                        <Building2 size={10} className="text-indigo-500" /> Unit Domain
+                      </label>
                       <select 
                         value={selectedData[c._id]?.departmentId || ""}
                         onChange={(e) => handleSelectChange(c._id, "departmentId", e.target.value)}
-                        className="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none transition-all"
+                        className="w-full bg-slate-50 border border-slate-100 rounded-2xl px-4 py-3 text-xs font-bold text-slate-700 outline-none focus:ring-4 focus:ring-indigo-500/5 transition-all appearance-none cursor-pointer"
                       >
-                        <option value="">Select Department</option>
+                        <option value="">Select Dept</option>
                         {departments.map((d) => (
                           <option key={d._id} value={d._id}>{d.name}</option>
                         ))}
                       </select>
                     </div>
 
+                    {/* Action Button */}
                     <button
                       onClick={() => handleAssign(c._id)}
-                      className="whitespace-now7rap bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-6 rounded-lg text-sm transition-all shadow-lg shadow-blue-100 active:scale-95"
+                      className="bg-indigo-600 hover:bg-[#0f172a] text-white py-3 px-8 rounded-2xl font-black text-[10px] uppercase tracking-[0.2em] transition-all flex justify-center items-center gap-2 shadow-xl shadow-indigo-100 active:scale-95 group/btn"
                     >
-                      Assign
+                      Assign <Send size={14} className="group-hover/btn:translate-x-1 group-hover/btn:-translate-y-1 transition-transform" />
                     </button>
                   </div>
 

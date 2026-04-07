@@ -1,4 +1,10 @@
+/* eslint-disable no-unused-vars */
 import { useEffect, useState } from "react";
+import { 
+  Bell, Send, Users, Shield, 
+  Building2, MessageSquare, AlertCircle, 
+  CheckCircle2, Loader2, Info, Radio 
+} from "lucide-react";
 import MainLayout from "../../components/layout/MainLayout";
 import { sendBulkNotification } from "../../api/notification.api";
 import { getDepartments } from "../../api/department.api";
@@ -16,10 +22,9 @@ function BulkNotifications() {
     const loadDepartments = async () => {
       try {
         const res = await getDepartments();
-        setDepartments(res.data);
+        setDepartments(res.data || []);
       } catch (err) {
-        setError("Failed to fetch departments");
-        console.error(err)
+        setError("Failed to fetch department registry.");
       }
     };
     loadDepartments();
@@ -31,7 +36,7 @@ function BulkNotifications() {
     setSuccess("");
 
     if (!message.trim()) {
-      setError("Please enter a message to broadcast.");
+      setError("Please compose a message before broadcasting.");
       return;
     }
 
@@ -44,9 +49,10 @@ function BulkNotifications() {
       });
 
       setMessage("");
-      setSuccess("Broadcast sent successfully to " + target.replace("_", " "));
+      setSuccess(`Broadcast successfully dispatched to ${target.replace("_", " ")}.`);
+      setTimeout(() => setSuccess(""), 4000);
     } catch (err) {
-      setError(err.response?.data?.message || "Failed to send notification");
+      setError(err.response?.data?.message || "Transmission failed. System error.");
     } finally {
       setLoading(false);
     }
@@ -54,94 +60,132 @@ function BulkNotifications() {
 
   return (
     <MainLayout>
-      <div className="px-6 py-8  bg-gradient-to-br from-blue-100 via-slate-100 to-blue-200 min-h-screen">
-         <div className="mb-8">
-          <h2 className="text-2xl font-bold text-slate-900">Bulk Notifications</h2>
-          <p className="text-slate-500 text-sm">Send important updates or alerts to multiple users at once.</p>
+      <div className="max-w-5xl mx-auto p-4 md:p-12 space-y-10 animate-in fade-in duration-700 pb-20">
+        
+        {/* --- DYNAMIC HEADER --- */}
+        <div className="text-center space-y-3 relative">
+          <div className="inline-flex items-center gap-2 bg-indigo-50 text-indigo-600 px-5 py-2 rounded-full border border-indigo-100 shadow-sm">
+            <Bell size={16} className="animate-pulse" />
+            <span className="text-[10px] font-black uppercase tracking-[0.2em]">Transmission Center</span>
+          </div>
+          <h1 className="text-4xl md:text-5xl font-black text-slate-900 tracking-tighter">
+            Bulk <span className="text-indigo-600">Notifications.</span>
+          </h1>
+          <p className="text-sm text-slate-400 font-medium max-w-xl mx-auto leading-relaxed italic">
+            Dispatch critical alerts, policy updates, or system-wide announcements to verified recipient groups.
+          </p>
         </div>
 
-        <div className="max-w-3xl mx-auto">
-           {error && (
-            <div className="mb-6 p-4 bg-red-50 border border-red-100 text-red-600 rounded-xl text-sm flex items-center gap-2">
-              <span className="font-bold">Error:</span> {error}
-            </div>
-          )}
-          {success && (
-            <div className="mb-6 p-4 bg-green-50 border border-green-100 text-green-700 rounded-xl text-sm flex items-center gap-2">
-              <span className="font-bold">Success:</span> {success}
-            </div>
-          )}
+        {/* --- STATUS ALERTS --- */}
+        {(error || success) && (
+          <div className={`p-4 rounded-2xl text-xs font-bold flex items-center gap-3 animate-in slide-in-from-top-2 border ${
+            error ? "bg-rose-50 border-rose-100 text-rose-600" : "bg-emerald-50 border-emerald-100 text-emerald-600"
+          }`}>
+            {error ? <AlertCircle size={18} /> : <CheckCircle2 size={18} />}
+            {error || success}
+          </div>
+        )}
 
-           <div className="bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden">
-            <div className="p-6 border-b border-slate-100 bg-slate-50/50">
-              <h4 className="font-semibold text-slate-800">New Broadcast Message</h4>
-            </div>
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-start">
+          
+          {/* --- LEFT: BROADCAST CONFIG --- */}
+          <div className="lg:col-span-12">
+            <div className="bg-white rounded-[3rem] border border-slate-200 shadow-2xl shadow-slate-200/50 overflow-hidden">
+              <div className="p-8 border-b border-slate-50 bg-slate-50/30 flex items-center justify-between">
+                <h4 className="text-sm font-black text-slate-800 uppercase tracking-widest flex items-center gap-2">
+                  <MessageSquare size={18} className="text-indigo-600" /> New Broadcast Session
+                </h4>
+                <div className="flex items-center gap-2 text-[10px] font-black text-slate-400 uppercase tracking-widest">
+                  <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" /> Channel: Secured
+                </div>
+              </div>
 
-            <form onSubmit={handleSend} className="p-6 space-y-6">
-               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
-                  <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">
-                    Recipient Group
+              <form onSubmit={handleSend} className="p-8 md:p-12 space-y-10">
+                
+                {/* 1. Recipient Selector */}
+                <div className="space-y-6">
+                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] ml-1">
+                    Select Target Recipient Group
                   </label>
-                  <select
-                    className="w-full bg-white border border-slate-300 rounded-lg px-3 py-2.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none transition-all"
-                    value={target}
-                    onChange={(e) => setTarget(e.target.value)}
-                  >
-                    <option value="all">All Registered Users</option>
-                    <option value="officers">All Department Officers</option>
-                    <option value="department">Specific Department</option>
-                  </select>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    {[
+                      { id: "all", label: "All Users", icon: Users, color: "blue" },
+                      { id: "officers", label: "Officers Only", icon: Shield, color: "indigo" },
+                      { id: "department", label: "Specific Unit", icon: Building2, color: "purple" }
+                    ].map((item) => (
+                      <button
+                        key={item.id}
+                        type="button"
+                        onClick={() => setTarget(item.id)}
+                        className={`p-6 rounded-[2rem] border-2 flex flex-col items-center gap-3 transition-all duration-300 active:scale-95 ${
+                          target === item.id 
+                          ? `border-indigo-600 bg-indigo-50/50 text-indigo-600 shadow-xl shadow-indigo-100` 
+                          : `border-slate-100 bg-white text-slate-400 grayscale opacity-60 hover:grayscale-0 hover:opacity-100`
+                        }`}
+                      >
+                        <item.icon size={28} />
+                        <span className="text-[10px] font-black uppercase tracking-widest">{item.label}</span>
+                      </button>
+                    ))}
+                  </div>
                 </div>
 
+                {/* 2. Department Selection (Conditional) */}
                 {target === "department" && (
-                  <div className="animate-in fade-in slide-in-from-left-2">
-                    <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">
-                      Target Department
-                    </label>
+                  <div className="space-y-2 animate-in slide-in-from-top-2 duration-500">
+                    <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Target Department Unit</label>
                     <select
-                      className="w-full bg-white border border-slate-300 rounded-lg px-3 py-2.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none transition-all"
+                      className="w-full bg-slate-50 border border-slate-100 rounded-2xl px-6 py-4 text-sm font-bold outline-none focus:ring-4 focus:ring-indigo-500/5 appearance-none cursor-pointer"
                       value={departmentId}
                       onChange={(e) => setDepartmentId(e.target.value)}
                     >
-                      <option value="">Choose Department...</option>
+                      <option value="">Search Domain Registry...</option>
                       {departments.map((d) => (
                         <option key={d._id} value={d._id}>{d.name}</option>
                       ))}
                     </select>
                   </div>
                 )}
-              </div>
 
-               <div>
-                <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">
-                  Broadcast Message
-                </label>
-                <textarea
-                  className="w-full border border-slate-300 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-blue-500 outline-none transition-all resize-none"
-                  placeholder="Type your announcement here..."
-                  value={message}
-                  onChange={(e) => setMessage(e.target.value)}
-                  rows={6}
-                />
-                <p className="mt-2 text-[11px] text-slate-400 italic">
-                  Note: This message will be sent immediately as a push notification or system alert.
-                </p>
-              </div>
+                {/* 3. Message Body */}
+                <div className="space-y-4">
+                  <div className="flex justify-between items-center px-1">
+                    <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Broadcast Content</label>
+                    <span className={`text-[10px] font-bold ${message.length > 500 ? 'text-rose-500' : 'text-slate-400'}`}>
+                      {message.length} characters
+                    </span>
+                  </div>
+                  <textarea
+                    className="w-full bg-slate-50 border border-slate-100 rounded-[2.5rem] px-8 py-8 text-sm font-medium leading-relaxed outline-none focus:ring-4 focus:ring-indigo-500/5 transition-all resize-none shadow-inner"
+                    placeholder="Compose the announcement details here. Be clear and concise."
+                    value={message}
+                    onChange={(e) => setMessage(e.target.value)}
+                    rows={6}
+                  />
+                  <div className="flex items-center gap-3 bg-indigo-50/50 p-4 rounded-2xl border border-indigo-100">
+                    <Info size={16} className="text-indigo-500 shrink-0" />
+                    <p className="text-[10px] font-bold text-indigo-600/80 leading-relaxed uppercase tracking-tight">
+                      Security Protocol: Broadcaster ID will be logged. Recipients will receive this as an official high-priority alert.
+                    </p>
+                  </div>
+                </div>
 
-               <div className="flex justify-end pt-2">
-                <button
-                  type="submit"
-                  disabled={loading}
-                  className="flex items-center gap-2 px-8 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-bold text-sm shadow-lg shadow-blue-100 transition-all active:scale-95 disabled:opacity-50"
-                >
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
-                  </svg>
-                  {loading ? "Sending..." : "Send Broadcast"}
-                </button>
-              </div>
-            </form>
+                {/* 4. Action Button */}
+                <div className="flex justify-center pt-4">
+                  <button
+                    type="submit"
+                    disabled={loading}
+                    className="group relative w-full md:w-auto md:px-16 bg-[#0f172a] hover:bg-indigo-600 text-white py-5 rounded-[2.5rem] font-black text-[11px] uppercase tracking-[0.2em] transition-all shadow-2xl active:scale-95 disabled:opacity-50"
+                  >
+                    <div className="flex items-center justify-center gap-3">
+                       {loading ? <Loader2 className="animate-spin" size={18} /> : <Send size={18} className="group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform" />}
+                       {loading ? "Transmitting Signal..." : "Dispatch Broadcast"}
+                    </div>
+                  </button>
+                </div>
+
+              </form>
+            </div>
           </div>
         </div>
       </div>

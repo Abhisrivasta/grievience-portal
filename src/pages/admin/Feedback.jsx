@@ -1,4 +1,12 @@
+/* eslint-disable no-unused-vars */
+/* eslint-disable react-hooks/exhaustive-deps */
 import { useEffect, useState, useCallback } from "react";
+import { 
+  Star, Search, Filter, RotateCcw, 
+  User, Calendar, ChevronLeft, ChevronRight, 
+  MessageSquare, Loader2, Quote, Mail,
+  ChevronFirst, ChevronLast, RefreshCw, AlertCircle
+} from "lucide-react";
 import MainLayout from "../../components/layout/MainLayout";
 import { getAllFeedback } from "../../api/feedback.api";
 
@@ -14,111 +22,73 @@ function useDebounce(value, delay = 500) {
   return debounced;
 }
 
-// ─── Star Rating Display ──────────────────────────────────────────────────────
+// ─── Star Rating Display (Executive Style) ───────────────────────────────────
 const StarRating = ({ rating }) => {
   return (
-    <div className="flex items-center gap-0.5">
+    <div className="flex items-center gap-1 bg-slate-50 px-2 py-1 rounded-lg border border-slate-100">
       {[1, 2, 3, 4, 5].map((star) => (
-        <svg
+        <Star
           key={star}
-          className={`w-4 h-4 ${star <= rating ? "text-amber-400" : "text-slate-200"}`}
-          fill="currentColor"
-          viewBox="0 0 20 20"
-        >
-          <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-        </svg>
+          size={12}
+          className={`${star <= rating ? "text-amber-500 fill-amber-500" : "text-slate-200"}`}
+        />
       ))}
-      <span className="ml-1 text-sm font-semibold text-slate-700">{rating}/5</span>
+      <span className="ml-1 text-[10px] font-black text-slate-700 tracking-tighter">{rating}/5</span>
     </div>
   );
 };
 
-// ─── Feedback Card ────────────────────────────────────────────────────────────
+// ─── Feedback Card (Modern Quote Look) ────────────────────────────────────────
 const FeedbackCard = ({ f }) => {
-  const ratingColor = {
-    5: "border-t-emerald-400",
-    4: "border-t-blue-400",
-    3: "border-t-amber-400",
-    2: "border-t-orange-400",
-    1: "border-t-red-400",
-  }[f.rating] || "border-t-slate-300";
+  const ratingTheme = {
+    5: "border-t-emerald-500 shadow-emerald-100/20",
+    4: "border-t-indigo-500 shadow-indigo-100/20",
+    3: "border-t-amber-500 shadow-amber-100/20",
+    2: "border-t-orange-500 shadow-orange-100/20",
+    1: "border-t-rose-500 shadow-rose-100/20",
+  }[f.rating] || "border-t-slate-200 shadow-slate-100/20";
 
   return (
-    <div className={`bg-white rounded-xl shadow-sm border border-slate-100 border-t-4 ${ratingColor} p-5 hover:shadow-md transition-shadow duration-200 flex flex-col`}>
-
-      {/* Top */}
-      <div className="flex items-start justify-between gap-2 mb-3">
-        <div className="flex-1 min-w-0">
-          <h3 className="font-semibold text-slate-800 text-base leading-snug truncate">
-            {f.complaint?.title || "No Title"}
-          </h3>
-          {f.complaint?.category && (
-            <span className="inline-block mt-1 text-xs bg-slate-100 text-slate-500 px-2 py-0.5 rounded-full uppercase tracking-wide">
-              {f.complaint.category}
+    <div className={`group bg-white rounded-[2rem] border border-slate-200 border-t-4 ${ratingTheme} p-6 hover:-translate-y-1 transition-all duration-300 flex flex-col shadow-xl relative overflow-hidden`}>
+      <Quote className="absolute -top-2 -right-2 text-slate-50 w-20 h-20 -z-0 opacity-50 group-hover:text-indigo-50 transition-colors" />
+      
+      <div className="relative z-10 flex-1 flex flex-col">
+        {/* Top Section */}
+        <div className="flex items-start justify-between gap-4 mb-4">
+          <div className="flex-1 min-w-0">
+            <span className="text-[9px] font-black text-indigo-600 bg-indigo-50 border border-indigo-100 px-2 py-0.5 rounded-full uppercase tracking-widest">
+              {f.complaint?.category || "General"}
             </span>
-          )}
+            <h3 className="font-black text-slate-800 text-sm mt-2 leading-tight truncate">
+              {f.complaint?.title || "No Subject"}
+            </h3>
+          </div>
+          <StarRating rating={f.rating} />
         </div>
-        <StarRating rating={f.rating} />
-      </div>
 
-      {/* Comment */}
-      <p className="text-sm text-slate-600 line-clamp-3 flex-1">
-        {f.comment || <span className="italic text-slate-400">No comment provided</span>}
-      </p>
+        {/* Comment Section */}
+        <p className="text-xs font-medium text-slate-500 leading-relaxed italic mb-6 line-clamp-4 flex-1">
+          {f.comment ? `"${f.comment}"` : <span className="opacity-40 italic">No detailed feedback provided.</span>}
+        </p>
 
-      {/* Divider */}
-      <div className="border-t border-slate-100 my-3" />
-
-      {/* Citizen Info */}
-      <div className="flex items-center gap-2">
-        <div className="w-8 h-8 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center font-semibold text-sm shrink-0">
-          {f.citizen?.name?.charAt(0)?.toUpperCase() || "?"}
+        {/* Footer Info */}
+        <div className="pt-4 border-t border-slate-50 flex items-center gap-3">
+          <div className="w-9 h-9 rounded-xl bg-[#0f172a] text-indigo-400 flex items-center justify-center font-black text-xs shadow-lg shrink-0">
+            {f.citizen?.name?.charAt(0)?.toUpperCase() || "C"}
+          </div>
+          <div className="min-w-0">
+            <p className="text-[10px] font-black text-slate-900 truncate uppercase tracking-tight">
+              {f.citizen?.name || "Citizen User"}
+            </p>
+            <div className="flex items-center gap-1 opacity-50 text-[9px] font-bold text-slate-400 truncate uppercase tracking-tighter">
+               <Calendar size={10} /> {f.createdAt ? new Date(f.createdAt).toLocaleDateString() : 'N/A'}
+            </div>
+          </div>
         </div>
-        <div className="min-w-0">
-          <p className="text-sm font-medium text-slate-700 truncate">
-            {f.citizen?.name || "Unknown"}
-          </p>
-          <p className="text-xs text-slate-400 truncate">
-            {f.citizen?.email || ""}
-          </p>
-        </div>
-        {f.createdAt && (
-          <span className="ml-auto text-xs text-slate-400 shrink-0">
-            {new Date(f.createdAt).toLocaleDateString("en-IN", {
-              day: "numeric", month: "short", year: "numeric",
-            })}
-          </span>
-        )}
       </div>
     </div>
   );
 };
-
-// ─── Skeleton Card ────────────────────────────────────────────────────────────
-const SkeletonCard = () => (
-  <div className="bg-white rounded-xl border border-slate-100 border-t-4 border-t-slate-200 p-5 animate-pulse">
-    <div className="flex justify-between mb-3">
-      <div className="space-y-2 flex-1">
-        <div className="h-4 bg-slate-200 rounded w-3/4" />
-        <div className="h-3 bg-slate-200 rounded w-1/4" />
-      </div>
-      <div className="h-4 bg-slate-200 rounded w-20" />
-    </div>
-    <div className="space-y-2 mb-4">
-      <div className="h-3 bg-slate-200 rounded" />
-      <div className="h-3 bg-slate-200 rounded" />
-      <div className="h-3 bg-slate-200 rounded w-2/3" />
-    </div>
-    <div className="border-t border-slate-100 my-3" />
-    <div className="flex items-center gap-2">
-      <div className="w-8 h-8 bg-slate-200 rounded-full" />
-      <div className="space-y-1 flex-1">
-        <div className="h-3 bg-slate-200 rounded w-1/3" />
-        <div className="h-2 bg-slate-200 rounded w-1/2" />
-      </div>
-    </div>
-  </div>
-);
 
 // ─── Main Component ───────────────────────────────────────────────────────────
 function AdminFeedback() {
@@ -134,10 +104,8 @@ function AdminFeedback() {
   const [rating, setRating] = useState("");
   const [sort, setSort] = useState("-createdAt");
 
-  // Debounce search — API call 500ms baad
   const debouncedSearch = useDebounce(search, 500);
 
-  // ── Fetch ──────────────────────────────────────────────────────────────────
   const loadFeedback = useCallback(async () => {
     setLoading(true);
     setError("");
@@ -147,216 +115,163 @@ function AdminFeedback() {
       if (rating) params.rating = rating;
 
       const res = await getAllFeedback(params);
-
-      // res = { data: [], totalPages, total, currentPage }
       setFeedbacks(res.data || []);
       setTotalPages(res.totalPages || 1);
       setTotalCount(res.total || 0);
     } catch (err) {
-      console.error(err);
-      setError("Failed to load feedback. Please try again.");
+      setError("Failed to synchronize citizen feedback registry.");
     } finally {
       setLoading(false);
     }
   }, [page, debouncedSearch, rating, sort]);
 
-  useEffect(() => {
-    loadFeedback();
-  }, [loadFeedback]);
+  useEffect(() => { loadFeedback(); }, [loadFeedback]);
 
-  // ── Helpers ────────────────────────────────────────────────────────────────
   const isFiltered = search || rating || sort !== "-createdAt";
-
   const resetFilters = () => {
-    setSearch("");
-    setRating("");
-    setSort("-createdAt");
-    setPage(1);
+    setSearch(""); setRating(""); setSort("-createdAt"); setPage(1);
   };
 
   const pageNumbers = () => {
     const pages = [];
     const delta = 2;
-    for (let i = Math.max(1, page - delta); i <= Math.min(totalPages, page + delta); i++) {
-      pages.push(i);
-    }
+    for (let i = Math.max(1, page - delta); i <= Math.min(totalPages, page + delta); i++) pages.push(i);
     return pages;
   };
 
-  // ── UI ─────────────────────────────────────────────────────────────────────
   return (
     <MainLayout>
-      <div className="min-h-screen px-4 md:px-6 py-8 bg-slate-50">
+      <div className="max-w-7xl mx-auto p-4 md:p-8 space-y-8 animate-in fade-in duration-700 pb-20">
 
-        {/* Header */}
-        <div className="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-          <div>
-            <h1 className="text-2xl font-bold text-slate-800">Citizen Feedback</h1>
-            <p className="text-sm text-slate-500 mt-0.5">
-              {loading ? "Loading..." : `${totalCount} total feedback${totalCount !== 1 ? "s" : ""}`}
+        {/* --- HEADER --- */}
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+          <div className="space-y-1">
+            <h1 className="text-3xl font-black text-slate-900 tracking-tight flex items-center gap-3">
+              <Star className="text-amber-500 fill-amber-500" size={32} />
+              Public Feedback
+            </h1>
+            <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">
+              {loading ? "Processing..." : `Satisfaction Audit: ${totalCount} Records`}
             </p>
           </div>
           <button
             onClick={loadFeedback}
-            className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg transition-colors"
+            className="flex items-center gap-2 px-5 py-2.5 bg-white border border-slate-200 rounded-2xl text-[10px] font-black uppercase tracking-widest text-slate-600 hover:bg-slate-50 transition-all shadow-sm"
           >
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
-                d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-            </svg>
-            Refresh
+            <RefreshCw size={14} className={loading ? "animate-spin" : ""} />
+            Refresh List
           </button>
         </div>
 
-        {/* Filters */}
-        <div className="bg-white rounded-xl shadow-sm border border-slate-100 p-4 mb-6">
-          <div className="flex flex-wrap gap-3 items-center">
-
-            {/* Search */}
-            <div className="relative flex-1 min-w-[180px]">
-              <svg className="absolute left-2.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400"
-                fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
-                  d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-              </svg>
-              <input
-                type="text"
-                placeholder="Search feedback..."
-                value={search}
-                onChange={(e) => { setSearch(e.target.value); setPage(1); }}
-                className="w-full border border-slate-200 pl-8 pr-3 py-2 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-300 text-slate-700"
-              />
-            </div>
-
-            {/* Rating */}
-            <select
-              value={rating}
-              onChange={(e) => { setRating(e.target.value); setPage(1); }}
-              className="border border-slate-200 px-3 py-2 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-300 text-slate-700 bg-white"
-            >
-              <option value="">All Ratings</option>
-              <option value="5">⭐⭐⭐⭐⭐ 5 Star</option>
-              <option value="4">⭐⭐⭐⭐ 4 Star</option>
-              <option value="3">⭐⭐⭐ 3 Star</option>
-              <option value="2">⭐⭐ 2 Star</option>
-              <option value="1">⭐ 1 Star</option>
-            </select>
-
-            {/* Sort */}
-            <select
-              value={sort}
-              onChange={(e) => { setSort(e.target.value); setPage(1); }}
-              className="border border-slate-200 px-3 py-2 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-300 text-slate-700 bg-white"
-            >
-              <option value="-createdAt">Newest First</option>
-              <option value="createdAt">Oldest First</option>
-              <option value="-rating">Highest Rating</option>
-              <option value="rating">Lowest Rating</option>
-            </select>
-
-            {/* Reset */}
-            <button
-              onClick={resetFilters}
-              disabled={!isFiltered}
-              className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
-                isFiltered
-                  ? "bg-red-500 hover:bg-red-600 text-white"
-                  : "bg-slate-100 text-slate-400 cursor-not-allowed"
-              }`}
-            >
-              Reset
-            </button>
+        {/* --- SMART FILTERS --- */}
+        <div className="bg-white rounded-[2.5rem] p-6 border border-slate-200 shadow-xl shadow-slate-200/50 flex flex-wrap items-center gap-4">
+          <div className="relative flex-1 min-w-[240px] group">
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-indigo-600 transition-colors" size={16} />
+            <input
+              type="text"
+              placeholder="Search feedback registry..."
+              value={search}
+              onChange={(e) => { setSearch(e.target.value); setPage(1); }}
+              className="w-full bg-slate-50 border border-slate-100 pl-12 pr-4 py-3 rounded-2xl text-xs font-bold outline-none focus:ring-4 focus:ring-indigo-500/5 transition-all"
+            />
           </div>
+
+          <select
+            value={rating}
+            onChange={(e) => { setRating(e.target.value); setPage(1); }}
+            className="bg-slate-50 border border-slate-100 px-4 py-3 rounded-2xl text-[10px] font-black uppercase tracking-widest outline-none focus:ring-4 focus:ring-indigo-500/5 transition-all cursor-pointer"
+          >
+            <option value="">Rating: All Levels</option>
+            {[5,4,3,2,1].map(r => <option key={r} value={r}>{r} Star Rating</option>)}
+          </select>
+
+          <select
+            value={sort}
+            onChange={(e) => { setSort(e.target.value); setPage(1); }}
+            className="bg-slate-50 border border-slate-100 px-4 py-3 rounded-2xl text-[10px] font-black uppercase tracking-widest outline-none focus:ring-4 focus:ring-indigo-500/5 transition-all cursor-pointer"
+          >
+            <option value="-createdAt">Order: Newest First</option>
+            <option value="createdAt">Order: Oldest First</option>
+            <option value="-rating">Order: Highest Rating</option>
+            <option value="rating">Order: Lowest Rating</option>
+          </select>
+
+          <button
+            onClick={resetFilters}
+            disabled={!isFiltered}
+            className={`p-3.5 rounded-2xl flex items-center justify-center transition-all shadow-inner ${
+              isFiltered ? "bg-rose-50 text-rose-600 hover:bg-rose-600 hover:text-white" : "bg-slate-100 text-slate-300 cursor-not-allowed"
+            }`}
+          >
+            <RotateCcw size={18} />
+          </button>
         </div>
 
-        {/* Error */}
         {error && (
-          <div className="bg-red-50 border border-red-200 text-red-600 rounded-lg px-4 py-3 mb-5 text-sm flex items-center gap-2">
-            <svg className="w-4 h-4 shrink-0" fill="currentColor" viewBox="0 0 20 20">
-              <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
-            </svg>
-            {error}
+          <div className="bg-rose-50 border border-rose-100 text-rose-600 rounded-2xl px-6 py-4 text-xs font-bold flex items-center gap-3 italic">
+            <AlertCircle size={18} /> {error}
           </div>
         )}
 
-        {/* Loading Skeleton */}
+        {/* --- GRID & CARDS --- */}
         {loading ? (
-          <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-3">
-            {[...Array(LIMIT)].map((_, i) => <SkeletonCard key={i} />)}
+          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+            {[...Array(LIMIT)].map((_, i) => (
+              <div key={i} className="h-64 bg-white border border-slate-100 rounded-[2rem] p-6 animate-pulse space-y-4">
+                 <div className="h-4 bg-slate-100 rounded w-1/4" />
+                 <div className="h-10 bg-slate-100 rounded w-full" />
+                 <div className="h-20 bg-slate-100 rounded w-full" />
+              </div>
+            ))}
           </div>
         ) : feedbacks.length === 0 ? (
-
-          /* Empty State */
-          <div className="bg-white rounded-xl border border-slate-100 p-14 text-center">
-            <svg className="w-12 h-12 text-slate-300 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5}
-                d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
-            </svg>
-            <p className="text-slate-500 font-medium">No feedback found</p>
-            <p className="text-slate-400 text-sm mt-1">
-              {isFiltered ? "Try changing or resetting your filters." : "No feedback has been submitted yet."}
-            </p>
-            {isFiltered && (
-              <button onClick={resetFilters} className="mt-3 text-blue-600 text-sm hover:underline">
-                Reset Filters
-              </button>
-            )}
+          <div className="bg-white rounded-[3rem] border border-slate-100 p-24 text-center shadow-xl">
+             <MessageSquare size={48} className="mx-auto text-slate-200 mb-4" />
+             <p className="text-xs font-black text-slate-400 uppercase tracking-widest">No Feedback entries found.</p>
           </div>
-
         ) : (
           <>
-            {/* Cards */}
-            <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-3">
+            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
               {feedbacks.map((f) => (
                 <FeedbackCard key={f._id} f={f} />
               ))}
             </div>
 
-            {/* Pagination */}
+            {/* --- DARK THEME PAGINATION --- */}
             {totalPages > 1 && (
-              <div className="flex items-center justify-center gap-1 mt-8">
-                <button
-                  onClick={() => setPage(1)}
-                  disabled={page === 1}
-                  className="px-2 py-1.5 rounded-lg text-sm text-slate-500 hover:bg-slate-200 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
-                >«</button>
+              <div className="flex items-center justify-between bg-[#0f172a] px-8 py-6 rounded-[2.5rem] shadow-2xl text-white mt-10">
+                <div className="flex gap-2">
+                  <button onClick={() => setPage(1)} disabled={page === 1} className="p-3 bg-white/5 border border-white/10 rounded-xl hover:bg-white hover:text-slate-900 disabled:opacity-20 transition-all">
+                    <ChevronFirst size={18} />
+                  </button>
+                  <button onClick={() => setPage(p => Math.max(1, p - 1))} disabled={page === 1} className="px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-white hover:text-slate-900 disabled:opacity-20 transition-all">
+                    Prev
+                  </button>
+                </div>
 
-                <button
-                  onClick={() => setPage((p) => Math.max(1, p - 1))}
-                  disabled={page === 1}
-                  className="px-3 py-1.5 rounded-lg text-sm text-slate-600 hover:bg-slate-200 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
-                >Prev</button>
+                <div className="flex items-center gap-2">
+                  {pageNumbers().map((p) => (
+                    <button
+                      key={p} onClick={() => setPage(p)}
+                      className={`w-10 h-10 rounded-xl text-[10px] font-black transition-all ${
+                        p === page ? "bg-indigo-600 shadow-lg shadow-indigo-500/20" : "bg-white/5 border border-white/10 hover:bg-white/20"
+                      }`}
+                    >
+                      {p}
+                    </button>
+                  ))}
+                </div>
 
-                {pageNumbers().map((p) => (
-                  <button
-                    key={p}
-                    onClick={() => setPage(p)}
-                    className={`w-9 h-9 rounded-lg text-sm font-medium transition-colors ${
-                      p === page
-                        ? "bg-blue-600 text-white shadow-sm"
-                        : "text-slate-600 hover:bg-slate-200"
-                    }`}
-                  >{p}</button>
-                ))}
-
-                <button
-                  onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
-                  disabled={page === totalPages}
-                  className="px-3 py-1.5 rounded-lg text-sm text-slate-600 hover:bg-slate-200 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
-                >Next</button>
-
-                <button
-                  onClick={() => setPage(totalPages)}
-                  disabled={page === totalPages}
-                  className="px-2 py-1.5 rounded-lg text-sm text-slate-500 hover:bg-slate-200 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
-                >»</button>
+                <div className="flex gap-2">
+                  <button onClick={() => setPage(p => Math.min(totalPages, p + 1))} disabled={page === totalPages} className="px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-white hover:text-slate-900 disabled:opacity-20 transition-all">
+                    Next
+                  </button>
+                  <button onClick={() => setPage(totalPages)} disabled={page === totalPages} className="p-3 bg-white/5 border border-white/10 rounded-xl hover:bg-white hover:text-slate-900 disabled:opacity-20 transition-all">
+                    <ChevronLast size={18} />
+                  </button>
+                </div>
               </div>
             )}
-
-            {/* Page Info */}
-            <p className="text-center text-xs text-slate-400 mt-2">
-              Page {page} of {totalPages} — showing {feedbacks.length} of {totalCount}
-            </p>
           </>
         )}
       </div>

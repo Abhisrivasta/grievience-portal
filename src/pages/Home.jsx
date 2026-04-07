@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { getHomePage } from "../api/home.api";
+import MainLayout from "../components/layout/MainLayout";
 
 export default function Home() {
   const [data, setData] = useState({
@@ -51,6 +52,7 @@ export default function Home() {
   if (loading) return <p className="text-center mt-10 text-white">Loading...</p>;
 
   return (
+    <MainLayout isPublic={true}>
     <div className="relative min-h-screen text-white overflow-hidden bg-black">
 
       {/* 🔥 BACKGROUND GLOW */}
@@ -122,10 +124,8 @@ export default function Home() {
         </section>
       )}
 
-      {/* 🔥 FOOTER */}
-      <footer className="text-center py-6 text-gray-500 border-t border-white/10">
-        © {new Date().getFullYear()} Digital Grievance System
-      </footer>
+    
     </div>
+    </MainLayout>
   );
 }

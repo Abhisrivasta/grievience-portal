@@ -29,6 +29,9 @@ import AdminComplaints from "../pages/admin/Complaints";
 import Reports from "../pages/admin/Reports";
 import Feedback from "../pages/admin/Feedback";
 import AdminHomeEditor from "../pages/admin/AdminHomeEditor";
+import AboutUs from "../components/AboutUs";
+import ContactUs from "../components/ContactUs";
+import AdminInquiries from "../pages/admin/AdminInquiries";
 
 function AppRoutes() {
   return (
@@ -63,10 +66,8 @@ function AppRoutes() {
       {/* ✅ ADMIN */}
       <Route element={<ProtectedRoute allowedRoles={["admin"]} />}>
         <Route path="/admin" element={<AdminDashboard />} />
-
-        {/* 🔥 NEW CMS ROUTE */}
         <Route path="/admin/home" element={<AdminHomeEditor />} />
-
+        <Route path="/admin/inquiries" element={<AdminInquiries />} />
         <Route path="/admin/departments" element={<Departments />} />
         <Route path="/admin/officers" element={<Officers />} />
         <Route path="/admin/assign" element={<AssignComplaints />} />
@@ -75,6 +76,9 @@ function AppRoutes() {
         <Route path="/admin/complaints" element={<AdminComplaints />} />
         <Route path="/admin/reports" element={<Reports />} />
         <Route path="/admin/feedback" element={<Feedback />} />
+
+        <Route path="/about" element={<AboutUs />} />
+<Route path="/contact" element={<ContactUs />} />
       </Route>
 
     </Routes>
