@@ -1,57 +1,93 @@
+/* eslint-disable no-unused-vars */
 import api from "./axios";
 
-// 👤 CITIZEN
-
-// Get my complaints (with filters, pagination)
-export const getMyComplaints = async (params = {}) => {
-  const res = await api.get("/complaints/my", { params });
-  return res.data;
+/**
+ * Utility: Clean params (Filters empty/null values)
+ */
+const cleanParams = (params) => {
+  return Object.fromEntries(
+    Object.entries(params).filter(
+      ([_, value]) => value !== undefined && value !== null && value !== ""
+    )
+  );
 };
 
-// Get single complaint (UPDATED ROUTE)
-export const getComplaintById = async (id) => {
-  const res = await api.get(`/complaints/citizen/${id}`);
-  return res.data;
+/**
+ * Centralized Request Handler
+ */
+const handleRequest = async (request) => {
+  try {
+    const res = await request;
+    return res.data; // Backend se hamesha { success, data, message } aana chahiye
+  } catch (error) {
+    const errorMessage = 
+      error.response?.data?.message || 
+      error.message || 
+      "An unexpected error occurred";
+    
+    console.error("API Error:", errorMessage);
+    throw { message: errorMessage, status: error.response?.status };
+  }
 };
 
-// Create complaint
-export const createComplaint = async (data) => {
-  const res = await api.post("/complaints", data);
-  return res.data;
+// --- 👤 CITIZEN SERVICES ---
+
+// 1. Nayi Shikayat (With Image)
+export const createComplaint = (formData) => 
+  handleRequest(api.post("/complaints", formData, {
+    headers: { "Content-Type": "multipart/form-data" },
+  }));
+
+// 2. List of My Complaints
+export const getMyComplaints = (params = {}) => 
+  handleRequest(api.get("/complaints/my", { params: cleanParams(params) }));
+
+// 3. 🔍 COMPLAINT DETAILS API (Citizen View)
+export const getComplaintById = (id) => {
+  if (!id) return Promise.reject({ message: "Complaint ID is required" });
+  return handleRequest(api.get(`/complaints/citizen/${id}`));
 };
 
 
-// 👨‍💼 OFFICER
+// --- 👨‍💼 OFFICER SERVICES ---
 
-// Get assigned complaints (with filters, search, pagination)
-export const getAssignedComplaints = async (params = {}) => {
-  const res = await api.get("/complaints/assigned", { params });
-  return res.data;
+// 4. Assigned List
+export const getAssignedComplaints = (params = {}) => 
+  handleRequest(api.get("/complaints/assigned", { params: cleanParams(params) }));
+
+// 5. 🔍 COMPLAINT DETAILS API (Officer View)
+export const getComplaintForOfficer = (id) => {
+  if (!id) return Promise.reject({ message: "Complaint ID is required" });
+  return handleRequest(api.get(`/complaints/officer/${id}`));
 };
 
-// Get single complaint (officer view)
-export const getComplaintForOfficer = async (id) => {
-  const res = await api.get(`/complaints/officer/${id}`);
-  return res.data;
-};
-
-// Update complaint status
-export const updateComplaintStatus = async (id, data) => {
-  const res = await api.put(`/complaints/${id}/status`, data);
-  return res.data;
+// 6. Update Status/Remarks
+export const updateComplaintStatus = (id, data) => {
+  if (!id) return Promise.reject({ message: "Complaint ID is required" });
+  return handleRequest(api.put(`/complaints/${id}/status`, data));
 };
 
 
-// 👑 ADMIN
+// --- 👑 ADMIN SERVICES ---
 
-// Get all complaints (FULL POWER API)
-export const getAllComplaints = async (params = {}) => {
-  const res = await api.get("/complaints", { params });
-  return res.data;
+// 7. Global List
+export const getAllComplaints = (params = {}) => 
+  handleRequest(api.get("/complaints", { params: cleanParams(params) }));
+
+// 8. Assign to Officer
+export const assignComplaint = (id, data) => {
+  if (!id) return Promise.reject({ message: "Complaint ID is required" });
+  return handleRequest(api.put(`/complaints/${id}/assign`, data));
 };
 
-// Assign complaint to officer
-export const assignComplaint = async (id, data) => {
-  const res = await api.put(`/complaints/${id}/assign`, data);
-  return res.data;
+// Saare functions ko ek saath export kar rahe hain
+export default {
+  createComplaint,
+  getMyComplaints,
+  getComplaintById,
+  getAssignedComplaints,
+  getComplaintForOfficer,
+  updateComplaintStatus,
+  getAllComplaints,
+  assignComplaint,
 };
