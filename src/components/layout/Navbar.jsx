@@ -3,7 +3,7 @@ import LogoutButton from "../common/LogoutButton";
 import NotificationBell from "../common/NotificationBell";
 import { User, ShieldCheck } from "lucide-react";
 
-const BASE_URL = import.meta.env.VITE_API_URL;
+const BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
 
 function Navbar() {
   const { user } = useAuth();

@@ -8,11 +8,20 @@ export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
+  // ✅ Deep merge — location jaise nested objects sahi se merge honge
   const updateUser = (userData) => {
     if (!userData) return;
 
     setUser((prev) => {
-      const updatedUser = { ...prev, ...userData };
+      const updatedUser = {
+        ...prev,
+        ...userData,
+        // ✅ location ko alag se merge karo
+        location: {
+          ...(prev?.location || {}),
+          ...(userData?.location || {}),
+        },
+      };
       localStorage.setItem("user", JSON.stringify(updatedUser));
       return updatedUser;
     });
@@ -34,7 +43,7 @@ export const AuthProvider = ({ children }) => {
       const token = localStorage.getItem("token");
       const savedUser = localStorage.getItem("user");
 
-      // Restore user from localStorage
+      // Pehle localStorage se restore karo (fast UI)
       if (savedUser && savedUser !== "undefined" && savedUser !== "null") {
         try {
           const parsedUser = JSON.parse(savedUser);
@@ -51,14 +60,11 @@ export const AuthProvider = ({ children }) => {
       }
 
       try {
-        const res = await getProfile();
-
-        // flexible handling
-        const userData = res?.data?.user || res?.data || res;
-
+        // ✅ getProfile already res.data.data return karta hai — direct use karo
+        const userData = await getProfile();
         updateUser(userData);
       } catch (err) {
-        console.error("Verification failed", err);
+        console.error("Token verification failed:", err);
         logout();
       } finally {
         setLoading(false);
@@ -72,8 +78,8 @@ export const AuthProvider = ({ children }) => {
     <AuthContext.Provider
       value={{
         user,
-        setUser,     
-        updateUser,  
+        setUser,
+        updateUser,
         login,
         logout,
         loading,
@@ -84,5 +90,4 @@ export const AuthProvider = ({ children }) => {
   );
 };
 
-// ✅ Custom hook
 export const useAuth = () => useContext(AuthContext);

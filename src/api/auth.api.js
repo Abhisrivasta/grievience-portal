@@ -1,29 +1,33 @@
 import api from "./axios";
+
 const handleError = (err) => {
-  throw err?.response?.data?.message || err.message || "Something went wrong";
+  // ✅ Backend se jo bhi message aaye woh throw karo
+  const message =
+    err?.response?.data?.message || err.message || "Something went wrong";
+  throw new Error(message);
 };
 
-//  LOGIN
+// LOGIN
 export const loginUser = async (credentials) => {
   try {
     const res = await api.post("/auth/login", credentials);
-    return res.data.data; 
+    return res.data.data;
   } catch (err) {
     handleError(err);
   }
 };
 
-//  REGISTER
+// REGISTER
 export const registerUser = async (data) => {
   try {
     const res = await api.post("/auth/register", data);
-    return res.data.data; // keep consistent
+    return res.data.data;
   } catch (err) {
     handleError(err);
   }
 };
 
-//  GET PROFILE
+// GET PROFILE
 export const getProfile = async () => {
   try {
     const res = await api.get("/auth/profile");
@@ -36,14 +40,11 @@ export const getProfile = async () => {
 // UPDATE PROFILE
 export const updateProfile = async (formData) => {
   try {
-
     const res = await api.put("/auth/update-profile", formData, {
       headers: {
         "Content-Type": "multipart/form-data",
       },
     });
-
-
     return res.data.data;
   } catch (err) {
     handleError(err);
