@@ -1,5 +1,6 @@
+/* eslint-disable no-unused-vars */
 import { useState, useEffect, useCallback, useRef } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { MapContainer, TileLayer, Marker, useMapEvents, useMap } from "react-leaflet";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
@@ -8,12 +9,12 @@ import {
   Info, Type, Tag, FileText, Camera, X, ImageIcon, AlertCircle
 } from "lucide-react";
 import MainLayout from "../../components/layout/MainLayout";
-import { createComplaint } from "../../api/complaint.api";
-
-// --- Leaflet Icon Fix ---
+import { createComplaint, getComplaintById, updateComplaint } from "../../api/complaint.api";
 import markerIcon2x from 'leaflet/dist/images/marker-icon-2x.png';
 import markerIcon from 'leaflet/dist/images/marker-icon.png';
 import markerShadow from 'leaflet/dist/images/marker-shadow.png';
+
+const BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:5000";
 
 delete L.Icon.Default.prototype._getIconUrl;
 L.Icon.Default.mergeOptions({
@@ -40,6 +41,8 @@ function MapLogic({ coords, setCoords, onLocationChange }) {
 function CreateComplaint() {
   const navigate = useNavigate();
   const fileInputRef = useRef(null);
+  const { id } = useParams();
+  const isEdit = !!id;
   
   // 1. Unified Form State
   const [form, setForm] = useState({ title: "", description: "", category: "", area: "" });
@@ -86,10 +89,32 @@ function CreateComplaint() {
     );
   };
 
-  const handleSubmit = async (e) => {
+
+  useEffect(() => {
+    if (isEdit && id) {
+      const loadComplaint = async () => {
+        try {
+          const res = await getComplaintById(id);
+          const data = res.data || res;
+          setForm({
+            title: data.title,
+            description: data.description,
+            category: data.category,
+            area: data.location.area
+          });
+          setCoords({ lat: data.location.latitude, lng: data.location.longitude });
+          if (data.image) setPreview(`${BASE_URL}/${data.image.replace(/\\/g, "/")}`);
+        } catch (err) {
+          setError("Failed to load complaint data");
+        }
+      };
+      loadComplaint();
+    }
+  }, [isEdit, id]);
+
+ const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
-
     const formData = new FormData();
     formData.append("title", form.title);
     formData.append("description", form.description);
@@ -99,16 +124,19 @@ function CreateComplaint() {
     formData.append("longitude", coords.lng);
     if (image) formData.append("image", image);
 
-    try {
-      await createComplaint(formData);
+  try {
+      if (isEdit) {
+        await updateComplaint(id, formData);
+      } else {
+        await createComplaint(formData);
+      }
       navigate("/citizen/complaints");
     } catch (err) {
-      setError(err.message || "Failed to submit complaint");
+      setError(err.message || "Operation failed");
     } finally {
       setLoading(false);
     }
   };
-
   return (
     <MainLayout>
       <div className="max-w-7xl mx-auto p-4 md:p-8 space-y-6 animate-in fade-in duration-700">
@@ -119,8 +147,7 @@ function CreateComplaint() {
             <ArrowLeft size={18} className="text-slate-600" />
           </button>
           <div>
-            <h1 className="text-2xl font-black text-slate-800 tracking-tight">Register New Grievance</h1>
-            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-0.5 tracking-[0.2em]">Official Submission Portal</p>
+<h1 className="text-2xl font-black">{isEdit ? "Update Grievance" : "Register New Grievance"}</h1>            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-0.5 tracking-[0.2em]">Official Submission Portal</p>
           </div>
         </div>
 

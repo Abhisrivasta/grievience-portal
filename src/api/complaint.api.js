@@ -80,6 +80,12 @@ export const assignComplaint = (id, data) => {
   return handleRequest(api.put(`/complaints/${id}/assign`, data));
 };
 
+
+export const updateComplaint = (id, formData) => 
+  handleRequest(api.put(`/complaints/update/${id}`, formData, {
+    headers: { "Content-Type": "multipart/form-data" },
+  }));
+
 // Saare functions ko ek saath export kar rahe hain
 export default {
   createComplaint,
@@ -90,4 +96,5 @@ export default {
   updateComplaintStatus,
   getAllComplaints,
   assignComplaint,
+  updateComplaint
 };

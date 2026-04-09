@@ -52,6 +52,7 @@ function AppRoutes() {
         <Route path="/citizen/complaints" element={<MyComplaints />} />
         <Route path="/citizen/complaints/:id" element={<ComplaintDetails />} />
         <Route path="/citizen/create" element={<CreateComplaint />} />
+        <Route path="/citizen/complaints/edit/:id" element={<CreateComplaint isEdit={true} />} />
       </Route>
 
       {/* 🔐 OFFICER ONLY */}
