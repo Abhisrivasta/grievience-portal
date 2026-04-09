@@ -13,7 +13,7 @@ function Profile() {
   const { user, updateUser, loading } = useAuth();
   const [isEditing, setIsEditing] = useState(false);
   const [updating, setUpdating] = useState(false);
-  const [error, setError] = useState(null); // ✅ Error state added
+  const [error, setError] = useState(null);
 
   // Form States
   const [name, setName] = useState(user?.name || "");
@@ -21,6 +21,10 @@ function Profile() {
   const [state, setState] = useState(user?.location?.state || "");
   const [ward, setWard] = useState(user?.location?.ward || "");
   const [photoPreview, setPhotoPreview] = useState(null);
+  const [selectedFile, setSelectedFile] = useState(null);
+
+  // ✅ FIX 1: photoTimestamp state — only updates on save, forcing img src change
+  const [photoTimestamp, setPhotoTimestamp] = useState(Date.now());
 
   const fileInputRef = useRef(null);
 
@@ -29,13 +33,27 @@ function Profile() {
 
   const handlePhotoChange = (e) => {
     const file = e.target.files[0];
-    if (file) setPhotoPreview(URL.createObjectURL(file));
+    if (file) {
+      setSelectedFile(file);
+      setPhotoPreview(URL.createObjectURL(file));
+    }
   };
 
-  // ✅ Cancel — sab kuch reset karo
+  const handleEdit = () => {
+    // ✅ FIX 2: Sync form state from latest user when entering edit mode
+    setName(user?.name || "");
+    setCity(user?.location?.city || "");
+    setState(user?.location?.state || "");
+    setWard(user?.location?.ward || "");
+    setPhotoPreview(null);
+    setError(null);
+    setIsEditing(true);
+  };
+
   const handleCancel = () => {
     setIsEditing(false);
     setPhotoPreview(null);
+    setSelectedFile(null);
     setError(null);
     setName(user?.name || "");
     setCity(user?.location?.city || "");
@@ -45,7 +63,6 @@ function Profile() {
   };
 
   const handleSave = async () => {
-    // ✅ Basic validation
     if (!name.trim()) {
       setError("Name cannot be empty");
       return;
@@ -60,18 +77,24 @@ function Profile() {
     formData.append("state", state.trim());
     formData.append("ward", ward.trim());
 
-    if (fileInputRef.current?.files[0]) {
-      formData.append("profilePhoto", fileInputRef.current.files[0]);
+    if (selectedFile) {
+      formData.append("profilePhoto", selectedFile);
     }
 
     try {
-      const updatedUser = await updateProfile(formData);
-      updateUser(updatedUser); // ✅ Context update
+      const res = await updateProfile(formData);
+
+      // ✅ FIX 3: updateUser with fresh server response
+      updateUser(res.user || res);
+
+      // ✅ FIX 1: Update timestamp AFTER save so profile img URL changes
+      setPhotoTimestamp(Date.now());
+
       setIsEditing(false);
       setPhotoPreview(null);
+      setSelectedFile(null);
       if (fileInputRef.current) fileInputRef.current.value = "";
     } catch (err) {
-      // ✅ Error user ko dikhta hai ab
       setError(err.message || "Failed to update profile");
     } finally {
       setUpdating(false);
@@ -94,7 +117,7 @@ function Profile() {
     <MainLayout>
       <div className="max-w-5xl mx-auto p-4 md:p-8 space-y-8 animate-in fade-in duration-700">
 
-        {/* ✅ Error Banner — globally dikhega */}
+        {/* Error Banner */}
         {error && (
           <div className="flex items-center gap-3 bg-red-50 border border-red-200 text-red-700 px-5 py-4 rounded-2xl text-sm font-semibold">
             <AlertCircle size={18} className="shrink-0" />
@@ -108,7 +131,7 @@ function Profile() {
           </div>
         )}
 
-        {/* 🏆 PROFILE HEADER CARD */}
+        {/* PROFILE HEADER CARD */}
         <div className="relative overflow-hidden bg-slate-900 rounded-[2.5rem] p-8 text-white shadow-2xl shadow-slate-300">
           <div className="absolute top-0 right-0 p-12 opacity-10 pointer-events-none">
             <UserIcon size={180} />
@@ -127,10 +150,10 @@ function Profile() {
                     />
                   ) : user?.profilePhoto ? (
                     <img
-                      src={`${BASE_URL}${user.profilePhoto}`}
+                      // ✅ FIX 1: Use photoTimestamp state, not Date.now() inline
+                      src={`${BASE_URL}${user.profilePhoto}?t=${photoTimestamp}`}
                       className="h-full w-full object-cover"
                       alt="Profile"
-                      // ✅ Image load fail hone pe initials dikhao
                       onError={(e) => { e.target.style.display = "none"; }}
                     />
                   ) : (
@@ -151,7 +174,7 @@ function Profile() {
                 type="file"
                 ref={fileInputRef}
                 hidden
-                accept="image/jpeg,image/jpg,image/png,image/webp" // ✅ Accept filter
+                accept="image/jpeg,image/jpg,image/png,image/webp"
                 onChange={handlePhotoChange}
               />
             </div>
@@ -168,7 +191,7 @@ function Profile() {
                   onChange={(e) => setName(e.target.value)}
                   className="text-4xl font-black bg-transparent border-b-2 border-indigo-500 outline-none w-full md:w-auto pb-1"
                   autoFocus
-                  maxLength={50} // ✅ Limit
+                  maxLength={50}
                 />
               ) : (
                 <h2 className="text-4xl font-black tracking-tight">
@@ -203,7 +226,7 @@ function Profile() {
                     {updating ? "Saving..." : "Save"}
                   </button>
                   <button
-                    onClick={handleCancel} // ✅ handleCancel use karo
+                    onClick={handleCancel}
                     disabled={updating}
                     className="p-3 bg-slate-800 text-slate-400 rounded-2xl hover:text-white transition-all border border-slate-700 disabled:opacity-60"
                   >
@@ -211,8 +234,9 @@ function Profile() {
                   </button>
                 </>
               ) : (
+                // ✅ FIX 2: Call handleEdit (syncs form state) instead of setIsEditing directly
                 <button
-                  onClick={() => setIsEditing(true)}
+                  onClick={handleEdit}
                   className="flex items-center gap-2 px-6 py-3 bg-indigo-600 text-white rounded-2xl font-bold hover:bg-indigo-700 transition-all shadow-xl shadow-indigo-500/20 text-sm"
                 >
                   <Edit3 size={18} /> Edit Profile
@@ -222,7 +246,7 @@ function Profile() {
           </div>
         </div>
 
-        {/* 📂 DETAILS & STATS */}
+        {/* DETAILS & STATS */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
 
           {/* ADDRESS FORM */}

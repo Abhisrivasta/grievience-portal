@@ -8,15 +8,16 @@ export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  // ✅ Deep merge — location jaise nested objects sahi se merge honge
+  // ✅ FIX 3: updateUser — fresh server data always wins over stale prev
+  // spread order: prev first, then userData overwrites, then location merged
+  // This was structurally correct before but initAuth was bypassing it (see below)
   const updateUser = (userData) => {
     if (!userData) return;
 
     setUser((prev) => {
       const updatedUser = {
-        ...prev,
+        ...(prev || {}),
         ...userData,
-        // ✅ location ko alag se merge karo
         location: {
           ...(prev?.location || {}),
           ...(userData?.location || {}),
@@ -43,26 +44,35 @@ export const AuthProvider = ({ children }) => {
       const token = localStorage.getItem("token");
       const savedUser = localStorage.getItem("user");
 
-      // Pehle localStorage se restore karo (fast UI)
-      if (savedUser && savedUser !== "undefined" && savedUser !== "null") {
-        try {
-          const parsedUser = JSON.parse(savedUser);
-          setUser(parsedUser);
-        } catch (err) {
-          console.error("Invalid stored user:", err);
-          localStorage.removeItem("user");
-        }
-      }
-
+      // No token — restore from localStorage as offline fallback only
       if (!token) {
+        if (savedUser && savedUser !== "undefined" && savedUser !== "null") {
+          try {
+            setUser(JSON.parse(savedUser));
+          } catch {
+            localStorage.removeItem("user");
+          }
+        }
         setLoading(false);
         return;
       }
 
+      // Has token — restore from localStorage first for fast initial render
+      if (savedUser && savedUser !== "undefined" && savedUser !== "null") {
+        try {
+          setUser(JSON.parse(savedUser));
+        } catch {
+          localStorage.removeItem("user");
+        }
+      }
+
       try {
-        // ✅ getProfile already res.data.data return karta hai — direct use karo
+        // ✅ FIX 3: Always replace with fresh server data — never merge with stale localStorage
+        // Previously, updateUser(userData) was called here which merged prev (stale localStorage)
+        // into server response. On second save this caused old profilePhoto/name to reappear.
         const userData = await getProfile();
-        updateUser(userData);
+        setUser(userData);
+        localStorage.setItem("user", JSON.stringify(userData));
       } catch (err) {
         console.error("Token verification failed:", err);
         logout();
