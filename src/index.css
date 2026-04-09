@@ -1,2 +1,29 @@
 @import "tailwindcss";
 
+.four_zero_four_bg {
+  background-image: url(https://cdn.dribbble.com/users/285475/screenshots/2083086/dribbble_1.gif);
+  height: 400px;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+
+.four_zero_four_bg h1 {
+  font-size: 80px;
+}
+
+.link_404 {
+  color: #fff !important;
+  padding: 12px 30px;
+  background: #4f46e5; /* Indigo-600 */
+  margin: 20px 0;
+  display: inline-block;
+  border-radius: 12px;
+  font-weight: bold;
+  text-decoration: none;
+  transition: all 0.3s ease;
+}
+
+.link_404:hover {
+  background: #4338ca;
+  box-shadow: 0 10px 20px -10px rgba(79, 70, 229, 0.5);
+}

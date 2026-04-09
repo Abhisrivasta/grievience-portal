@@ -15,7 +15,7 @@ export const sidebarLinks = {
 
     { path: "/admin/home", label: "Home Page" },
     { path: "/admin/inquiries", label: "Inquiry Page" },
-
+    
     { path: "/admin/departments", label: "Departments" },
     { path: "/admin/officers", label: "Officers" },
     { path: "/admin/assign", label: "Assign Complaints" },
@@ -23,6 +23,7 @@ export const sidebarLinks = {
     { path: "/admin/audit", label: "Audit Logs" },
     { path: "/admin/complaints", label: "Complaints" },
     { path: "/admin/notifications", label: "Bulk Notifications" },
-    { path: "/admin/feedback", label: "Feedback" }, // ⚠️ was missing
+    { path: "/admin/feedback", label: "Feedback" }, 
+    { path: "/admin/about", label: "About Page" }, 
   ],
 };

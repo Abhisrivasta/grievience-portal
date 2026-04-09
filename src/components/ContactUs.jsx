@@ -1,9 +1,14 @@
-import { Mail, Phone, MapPin, Send, MessageSquare, Clock } from "lucide-react";
+import { Mail, Phone, MapPin, Send, MessageSquare, Clock, LayoutDashboard } from "lucide-react";
 import MainLayout from "./layout/MainLayout";
 import { useState } from "react";
 import { createInquiry } from "../api/inquiry.api";
+import { Link } from "react-router-dom"; 
+import { useAuth } from "../contexts/AuthContext";
 
 function ContactUs() {
+  const { user } = useAuth(); 
+  // 🔥 DASHBOARD REDIRECT LOGIC
+  const dashboardPath = user ? `/${user.role}` : "/";
 
   // 🔥 STATE
   const [formData, setFormData] = useState({
@@ -30,16 +35,8 @@ function ContactUs() {
 
     try {
       await createInquiry(formData);
-
       alert("✅ Message sent successfully!");
-
-      setFormData({
-        name: "",
-        email: "",
-        subject: "",
-        message: ""
-      });
-
+      setFormData({ name: "", email: "", subject: "", message: "" });
     } catch (err) {
       console.error(err);
       alert(err.response?.data?.message || "Something went wrong");
@@ -63,6 +60,17 @@ function ContactUs() {
               <p className="text-slate-500 font-medium leading-relaxed">
                 Have a technical issue or need help with a grievance? Our support team is available to assist you.
               </p>
+
+              {/* 🏠 DYNAMIC DASHBOARD BUTTON */}
+              <div className="pt-2">
+                <Link 
+                  to={dashboardPath} 
+                  className="inline-flex items-center gap-2 bg-slate-900 text-white px-6 py-3 rounded-2xl font-bold hover:bg-slate-800 transition-all hover:shadow-lg text-sm"
+                >
+                  <LayoutDashboard size={18} />
+                  {user ? "Back to Dashboard" : "Back to Home"}
+                </Link>
+              </div>
             </div>
 
             <div className="space-y-4">
@@ -93,12 +101,8 @@ function ContactUs() {
                 <h3 className="text-xl font-black text-slate-800">Send us a Message</h3>
               </div>
 
-              {/* 🔥 FORM */}
               <form onSubmit={handleSubmit} className="space-y-6">
-
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  
-                  {/* NAME */}
                   <div>
                     <label className="text-xs font-bold text-slate-500">Your Name</label>
                     <input
@@ -110,8 +114,6 @@ function ContactUs() {
                       className="w-full mt-2 bg-slate-50 border rounded-xl px-4 py-3"
                     />
                   </div>
-
-                  {/* EMAIL */}
                   <div>
                     <label className="text-xs font-bold text-slate-500">Email</label>
                     <input
@@ -123,10 +125,8 @@ function ContactUs() {
                       className="w-full mt-2 bg-slate-50 border rounded-xl px-4 py-3"
                     />
                   </div>
-
                 </div>
 
-                {/* SUBJECT */}
                 <div>
                   <label className="text-xs font-bold text-slate-500">Subject</label>
                   <input
@@ -139,7 +139,6 @@ function ContactUs() {
                   />
                 </div>
 
-                {/* MESSAGE */}
                 <div>
                   <label className="text-xs font-bold text-slate-500">Message</label>
                   <textarea
@@ -152,15 +151,13 @@ function ContactUs() {
                   />
                 </div>
 
-                {/* BUTTON */}
                 <button
                   type="submit"
                   disabled={loading}
-                  className="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-4 rounded-xl font-bold transition"
+                  className="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-4 rounded-xl font-bold transition flex items-center justify-center gap-2"
                 >
-                  {loading ? "Sending..." : "Send Message"}
+                  {loading ? "Sending..." : <><Send size={18} /> Send Message</>}
                 </button>
-
               </form>
             </div>
           </div>
