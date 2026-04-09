@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable react-refresh/only-export-components */
 import { createContext, useContext, useEffect, useState } from "react";
@@ -5,6 +6,8 @@ import {
   getNotifications,
   getUnreadCount,
   markAsRead,
+    deleteNotification as deleteNotificationAPI, // ✅ ADD THIS
+
 } from "../api/notification.api";
 import { useAuth } from "./AuthContext";
 
@@ -33,6 +36,19 @@ export const NotificationProvider = ({ children }) => {
     loadUnreadCount();
   };
 
+  
+  const deleteNotification = async (id) => {
+  try {
+    await deleteNotificationAPI(id); // ✅ सही API
+
+    setNotifications((prev) =>
+      prev.filter((n) => n._id !== id)
+    );
+  } catch (err) {
+    console.error("Delete failed");
+  }
+};
+
   useEffect(() => {
     (async () => {
       await loadNotifications();
@@ -46,6 +62,7 @@ export const NotificationProvider = ({ children }) => {
         notifications,
         unreadCount,
         readNotification,
+        deleteNotification,
       }}
     >
       {children}

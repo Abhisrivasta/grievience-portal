@@ -5,36 +5,29 @@ import {
   MessageSquare,
   Calendar,
   Trash2,
-  Search,
   Loader2,
-  AlertCircle
 } from "lucide-react";
 
 import MainLayout from "../../components/layout/MainLayout";
 import {
   getAllInquiries,
   deleteInquiry,
-  updateInquiry
+  updateInquiry,
 } from "../../api/inquiry.api";
 
 function AdminInquiries() {
-
   const [inquiries, setInquiries] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
-  const [searchTerm, setSearchTerm] = useState("");
+  const [replyDraft, setReplyDraft] = useState({});
 
   // 🔥 FETCH
   const fetchInquiries = async () => {
     try {
       setLoading(true);
-
-      const res = await getAllInquiries(); 
+      const res = await getAllInquiries();
       setInquiries(res.data.data);
-
     } catch (err) {
       console.error(err);
-      setError(err.message || "Failed to load inquiries");
     } finally {
       setLoading(false);
     }
@@ -56,64 +49,51 @@ function AdminInquiries() {
     }
   };
 
-  // 🔥 STATUS UPDATE
-  const handleStatusChange = async (id, status) => {
+  // 🔥 REPLY + NOTIFICATION TRIGGER
+  const handleReply = async (id) => {
+    const message = replyDraft[id];
+
+    if (!message || message.trim() === "") {
+      return alert("Reply cannot be empty");
+    }
+
     try {
-      await updateInquiry(id, { status });
+      await updateInquiry(id, {
+        status: "Replied",
+        replyMessage: message,
+      });
+
+      // clear input
+      setReplyDraft((prev) => ({ ...prev, [id]: "" }));
+
       fetchInquiries();
     } catch (err) {
-      alert("Status update failed");
+      alert("Reply failed");
     }
   };
 
-  // 🔍 FILTER
-  const filteredInquiries = inquiries.filter((iq) =>
-    iq.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    iq.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    iq.subject.toLowerCase().includes(searchTerm.toLowerCase())
-  );
-
   return (
     <MainLayout>
-      <div className="max-w-7xl mx-auto p-4 md:p-8 space-y-8">
+      <div className="max-w-7xl mx-auto p-6 space-y-8">
 
         {/* HEADER */}
-        <div className="flex justify-between items-center">
-          <h1 className="text-3xl font-black flex items-center gap-3">
-            <MessageSquare className="text-indigo-600" />
-            User Inquiries
-          </h1>
-
-          <input
-            type="text"
-            placeholder="Search..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="px-4 py-2 border rounded-xl"
-          />
-        </div>
-
-        {/* ERROR */}
-        {error && (
-          <div className="bg-red-100 text-red-600 p-3 rounded">
-            {error}
-          </div>
-        )}
+        <h1 className="text-3xl font-bold flex items-center gap-3">
+          <MessageSquare className="text-indigo-600" />
+          User Inquiries
+        </h1>
 
         {/* TABLE */}
         <div className="bg-white rounded-xl shadow overflow-hidden">
-
           {loading ? (
             <div className="p-10 flex justify-center">
               <Loader2 className="animate-spin" />
             </div>
-          ) : filteredInquiries.length === 0 ? (
+          ) : inquiries.length === 0 ? (
             <div className="p-10 text-center text-gray-400">
               No inquiries found
             </div>
           ) : (
             <table className="w-full">
-
               <thead className="bg-gray-900 text-white text-xs">
                 <tr>
                   <th className="p-4 text-left">User</th>
@@ -126,7 +106,7 @@ function AdminInquiries() {
               </thead>
 
               <tbody>
-                {filteredInquiries.map((iq) => (
+                {inquiries.map((iq) => (
                   <tr key={iq._id} className="border-b hover:bg-gray-50">
 
                     {/* USER */}
@@ -138,9 +118,7 @@ function AdminInquiries() {
                     </td>
 
                     {/* SUBJECT */}
-                    <td className="p-4 font-semibold">
-                      {iq.subject}
-                    </td>
+                    <td className="p-4 font-semibold">{iq.subject}</td>
 
                     {/* MESSAGE */}
                     <td className="p-4 text-sm text-gray-600 max-w-xs truncate">
@@ -155,37 +133,63 @@ function AdminInquiries() {
 
                     {/* STATUS */}
                     <td className="p-4">
-                      <select
-                        value={iq.status}
-                        onChange={(e) =>
-                          handleStatusChange(iq._id, e.target.value)
-                        }
-                        className="border px-2 py-1 rounded"
+                      <span
+                        className={`px-2 py-1 rounded text-xs font-semibold ${
+                          iq.status === "Pending"
+                            ? "bg-yellow-100 text-yellow-700"
+                            : iq.status === "Replied"
+                            ? "bg-green-100 text-green-700"
+                            : "bg-gray-200 text-gray-700"
+                        }`}
                       >
-                        <option value="Pending">Pending</option>
-                        <option value="Replied">Replied</option>
-                        <option value="Closed">Closed</option>
-                      </select>
+                        {iq.status}
+                      </span>
                     </td>
 
                     {/* ACTION */}
-                    <td className="p-4 text-center">
-                      <button
-                        onClick={() => handleDelete(iq._id)}
-                        className="text-red-500 hover:text-red-700"
-                      >
-                        <Trash2 size={18} />
-                      </button>
+                    <td className="p-4">
+                      <div className="flex flex-col gap-2">
+
+                        {/* REPLY BOX */}
+                        <div className="flex gap-2">
+                          <input
+                            type="text"
+                            placeholder="Write reply..."
+                            value={replyDraft[iq._id] || ""}
+                            onChange={(e) =>
+                              setReplyDraft((prev) => ({
+                                ...prev,
+                                [iq._id]: e.target.value,
+                              }))
+                            }
+                            className="border rounded px-2 py-1 text-sm flex-1"
+                          />
+
+                          <button
+                            onClick={() => handleReply(iq._id)}
+                            disabled={!replyDraft[iq._id]}
+                            className="bg-indigo-600 hover:bg-indigo-700 text-white px-3 py-1 rounded text-xs font-semibold disabled:opacity-40"
+                          >
+                            Send
+                          </button>
+                        </div>
+
+                        {/* DELETE */}
+                        <button
+                          onClick={() => handleDelete(iq._id)}
+                          className="text-red-500 hover:text-red-700"
+                        >
+                          <Trash2 size={18} />
+                        </button>
+                      </div>
                     </td>
 
                   </tr>
                 ))}
               </tbody>
-
             </table>
           )}
         </div>
-
       </div>
     </MainLayout>
   );

@@ -27,3 +27,15 @@ export const sendBulkNotification = async (data) => {
   );
   return res.data;
 };
+
+
+export const sendSingleNotification = async (data) => {
+  const res = await api.post("/notifications/single", data);
+  return res.data;
+};
+
+
+export const deleteNotification = async (id) => {
+  const res = await api.delete(`/notifications/${id}`);
+  return res.data;
+};
