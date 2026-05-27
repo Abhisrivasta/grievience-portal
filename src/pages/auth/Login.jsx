@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { loginUser, googleLogin } from "../../api/auth.api";
 import { useAuth } from "../../contexts/AuthContext";
+import toast from "react-hot-toast";
 
 // Firebase
 import { signInWithPopup } from "firebase/auth";
@@ -10,7 +11,6 @@ import { auth, provider } from "../../firebase";
 function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
   const navigate = useNavigate();
@@ -21,18 +21,21 @@ function Login() {
     e.preventDefault();
 
     if (!email || !password) {
-      return setError("Email and password are required");
+      return toast.error("Email and password are required");
     }
 
-    setError("");
     setLoading(true);
 
     try {
+      toast.loading("Logging in...", { id: "login" });
+
       const data = await loginUser({ email, password });
 
       login(data);
 
       const role = data.user.role;
+
+      toast.success("Login successful 🚀", { id: "login" });
 
       if (role === "citizen") navigate("/citizen");
       else if (role === "officer") navigate("/officer");
@@ -40,7 +43,10 @@ function Login() {
       else navigate("/");
 
     } catch (err) {
-      setError(err.message);
+      toast.error(
+        err.message || "Login failed",
+        { id: "login" }
+      );
     } finally {
       setLoading(false);
     }
@@ -49,14 +55,16 @@ function Login() {
   // ================= GOOGLE LOGIN =================
   const handleGoogleLogin = async () => {
     try {
-      const result = await signInWithPopup(auth, provider);
+      toast.loading("Connecting Google...", { id: "google" });
 
+      const result = await signInWithPopup(auth, provider);
       const firebaseToken = await result.user.getIdToken();
 
-      // 🔥 use API function
       const data = await googleLogin(firebaseToken);
 
       login(data);
+
+      toast.success("Google login successful 🚀", { id: "google" });
 
       const role = data.user.role;
 
@@ -67,16 +75,18 @@ function Login() {
 
     } catch (err) {
       console.log(err);
-      setError("Google login failed");
+      toast.error("Google login failed", { id: "google" });
     }
   };
 
   return (
     <div className="relative min-h-screen flex items-center justify-center px-6 bg-black text-white overflow-hidden">
 
+      {/* 🔥 Background */}
       <div className="absolute w-[400px] h-[400px] bg-blue-500/30 blur-[120px] top-[-100px] left-[-100px]"></div>
       <div className="absolute w-[400px] h-[400px] bg-purple-500/30 blur-[120px] bottom-[-100px] right-[-100px]"></div>
 
+      {/* 🔥 Card */}
       <div className="relative z-10 w-full max-w-md bg-white/10 backdrop-blur-xl border border-white/10 rounded-3xl shadow-2xl p-8">
 
         <Link to="/" className="text-sm text-gray-300 hover:text-white">
@@ -89,14 +99,9 @@ function Login() {
           Login to continue to your dashboard
         </p>
 
-        {error && (
-          <div className="mt-4 bg-red-500/20 border border-red-500 text-red-300 text-sm px-4 py-2 rounded-lg">
-            {error}
-          </div>
-        )}
-
         <form onSubmit={handleSubmit} className="mt-6 space-y-5">
 
+          {/* Email */}
           <input
             type="email"
             value={email}
@@ -105,6 +110,7 @@ function Login() {
             className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg text-white"
           />
 
+          {/* Password */}
           <input
             type="password"
             value={password}
@@ -113,6 +119,7 @@ function Login() {
             className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg text-white"
           />
 
+          {/* Login */}
           <button
             type="submit"
             disabled={loading}
@@ -121,6 +128,7 @@ function Login() {
             {loading ? "Logging in..." : "Login"}
           </button>
 
+          {/* Google */}
           <button
             type="button"
             onClick={handleGoogleLogin}
@@ -131,6 +139,18 @@ function Login() {
 
         </form>
 
+        {/* 🔥 Resend Verification */}
+        <p className="text-center text-sm text-gray-400 mt-3">
+          Didn’t receive verification email?{" "}
+          <Link
+            to="/resend-verification"
+            className="text-blue-400 hover:underline"
+          >
+            Resend
+          </Link>
+        </p>
+
+        {/* Register */}
         <p className="text-center text-sm text-gray-400 mt-6">
           Don’t have an account?{" "}
           <Link to="/register" className="text-blue-400">

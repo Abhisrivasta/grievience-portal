@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import api from "../../api/axios";
+import toast from "react-hot-toast";
 
 function Register() {
   const navigate = useNavigate();
@@ -15,7 +16,6 @@ function Register() {
   });
 
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -23,16 +23,20 @@ function Register() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setError("");
 
-    if (!form.name || !form.email || !form.password) {
-      setError("Name, email and password are required");
-      return;
+    if (!form.name?.trim()) return toast.error("Enter your name");
+    if (!form.email?.trim()) return toast.error("Enter your email");
+    if (!form.password) return toast.error("Enter password");
+
+    if (form.password.length < 6) {
+      return toast.error("Password must be at least 6 characters");
     }
 
     setLoading(true);
 
     try {
+      toast.loading("Creating account...", { id: "register" });
+
       await api.post("/auth/register", {
         name: form.name,
         email: form.email,
@@ -44,9 +48,19 @@ function Register() {
         },
       });
 
-      navigate("/login");
+      // 🔥 Success
+      toast.success("Verification email sent! Check your inbox 📩", {
+        id: "register",
+      });
+
+      // redirect after delay
+      setTimeout(() => {
+        navigate("/login");
+      }, 1500);
     } catch (err) {
-      setError(err.response?.data?.message || "Registration failed");
+      toast.error(err.response?.data?.message || "Registration failed", {
+        id: "register",
+      });
     } finally {
       setLoading(false);
     }
@@ -54,15 +68,10 @@ function Register() {
 
   return (
     <div className="relative min-h-screen flex items-center justify-center px-6 bg-black text-white overflow-hidden">
-
-      {/* 🔥 Background Glow */}
       <div className="absolute w-[400px] h-[400px] bg-blue-500/30 blur-[120px] top-[-100px] left-[-100px]"></div>
       <div className="absolute w-[400px] h-[400px] bg-purple-500/30 blur-[120px] bottom-[-100px] right-[-100px]"></div>
 
-      {/* 🔥 Card */}
       <div className="relative z-10 w-full max-w-lg bg-white/10 backdrop-blur-xl border border-white/10 rounded-3xl shadow-2xl p-8">
-
-        {/* 🔙 Home Link */}
         <Link
           to="/"
           className="text-sm text-gray-300 hover:text-white transition"
@@ -70,23 +79,13 @@ function Register() {
           ← Back to Home
         </Link>
 
-        <h2 className="text-3xl font-bold mt-4">
-          Create Account 🚀
-        </h2>
+        <h2 className="text-3xl font-bold mt-4">Create Account 🚀</h2>
 
         <p className="text-gray-400 text-sm mt-1">
           Join the grievance system and raise your voice
         </p>
 
-        {/* Error */}
-        {error && (
-          <div className="mt-4 bg-red-500/20 border border-red-500 text-red-300 text-sm px-4 py-2 rounded-lg">
-            {error}
-          </div>
-        )}
-
         <form onSubmit={handleSubmit} className="mt-6 space-y-4">
-
           {/* Name */}
           <input
             type="text"
@@ -162,10 +161,7 @@ function Register() {
         {/* Login Link */}
         <p className="text-center text-sm text-gray-400 mt-6">
           Already registered?{" "}
-          <Link
-            to="/login"
-            className="text-blue-400 hover:underline"
-          >
+          <Link to="/login" className="text-blue-400 hover:underline">
             Login
           </Link>
         </p>

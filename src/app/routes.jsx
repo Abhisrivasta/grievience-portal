@@ -34,6 +34,11 @@ import AdminHomeEditor from "../pages/admin/AdminHomeEditor";
 import AdminAboutEditor from "../pages/admin/AdminAboutEditor"; // Added Editor
 import AdminInquiries from "../pages/admin/AdminInquiries";
 import NotFound from "../pages/NotFound";
+import EmailVerified from "../pages/auth/EmailVerified";
+import VerifyFailed from "../pages/auth/VerifyFailed";
+import ResendVerification from "../pages/auth/ResendVerification";
+import ResetPassword from "../pages/auth/ResetPassword";
+import ForgotPassword from "../pages/auth/ForgotPassword";
 
 function AppRoutes() {
   return (
@@ -44,12 +49,20 @@ function AppRoutes() {
       <Route path="/contact" element={<ContactUs />} />
       <Route path="/login" element={<Login />} />
       <Route path="/register" element={<Register />} />
+      <Route path="/email-verified" element={<EmailVerified />} />
+      <Route path="/verify-failed" element={<VerifyFailed />} />
+      <Route path="/resend-verification" element={<ResendVerification />} />
+      <Route path="/forgot-password" element={<ForgotPassword />} />
+<Route path="/reset-password/:token" element={<ResetPassword />} />
       <Route path="/unauthorized" element={<Unauthorized />} />
       <Route path="*" element={<NotFound />} />
 
-
       {/* ✅ PROTECTED (ALL LOGGED IN USERS) */}
-      <Route element={<ProtectedRoute allowedRoles={["citizen", "officer", "admin"]} />}>
+      <Route
+        element={
+          <ProtectedRoute allowedRoles={["citizen", "officer", "admin"]} />
+        }
+      >
         <Route path="/profile" element={<Profile />} />
       </Route>
 
@@ -65,18 +78,20 @@ function AppRoutes() {
       <Route element={<ProtectedRoute allowedRoles={["officer"]} />}>
         <Route path="/officer" element={<OfficerDashboard />} />
         <Route path="/officer/assigned" element={<AssignedComplaints />} />
-        <Route path="/officer/complaints/:id" element={<OfficerComplaintDetails />} />
+        <Route
+          path="/officer/complaints/:id"
+          element={<OfficerComplaintDetails />}
+        />
       </Route>
 
       {/* ✅ ADMIN ONLY */}
       <Route element={<ProtectedRoute allowedRoles={["admin"]} />}>
         <Route path="/admin" element={<AdminDashboard />} />
-        
         {/* Content Management */}
         <Route path="/admin/home" element={<AdminHomeEditor />} />
-        <Route path="/admin/about" element={<AdminAboutEditor />} /> {/* CMS for About page */}
+        <Route path="/admin/about" element={<AdminAboutEditor />} />{" "}
+        {/* CMS for About page */}
         <Route path="/admin/inquiries" element={<AdminInquiries />} />
-        
         {/* Operations */}
         <Route path="/admin/departments" element={<Departments />} />
         <Route path="/admin/officers" element={<Officers />} />

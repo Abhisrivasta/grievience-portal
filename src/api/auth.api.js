@@ -6,7 +6,7 @@ const handleError = (err) => {
   throw new Error(message);
 };
 
-// LOGIN
+// ================= LOGIN =================
 export const loginUser = async (credentials) => {
   try {
     const res = await api.post("/auth/login", credentials);
@@ -16,7 +16,7 @@ export const loginUser = async (credentials) => {
   }
 };
 
-// REGISTER
+// ================= REGISTER =================
 export const registerUser = async (data) => {
   try {
     const res = await api.post("/auth/register", data);
@@ -26,7 +26,21 @@ export const registerUser = async (data) => {
   }
 };
 
-// GET PROFILE
+// ================= GOOGLE LOGIN =================
+export const googleLogin = async (idToken) => {
+  try {
+    const res = await api.post(
+      "/auth/google",
+      { idToken },
+      { withCredentials: true }
+    );
+    return res.data.data;
+  } catch (err) {
+    handleError(err);
+  }
+};
+
+// ================= GET PROFILE =================
 export const getProfile = async () => {
   try {
     const res = await api.get("/auth/profile");
@@ -36,7 +50,7 @@ export const getProfile = async () => {
   }
 };
 
-// UPDATE PROFILE
+// ================= UPDATE PROFILE =================
 export const updateProfile = async (formData) => {
   try {
     const res = await api.put("/auth/update-profile", formData, {
@@ -50,16 +64,32 @@ export const updateProfile = async (formData) => {
   }
 };
 
-// GOOGLE LOGIN
-export const googleLogin = async (idToken) => {
+// ================= RESEND VERIFICATION =================
+export const resendVerification = async (email) => {
   try {
-    const res = await api.post(
-      "/auth/google",
-      { idToken },
-      {
-        withCredentials: true, 
-      }
-    );
+    const res = await api.post("/auth/resend-verification", { email });
+    return res.data.data;
+  } catch (err) {
+    handleError(err);
+  }
+};
+
+// ================= FORGOT PASSWORD =================
+export const forgotPassword = async (email) => {
+  try {
+    const res = await api.post("/auth/forgot-password", { email });
+    return res.data.data;
+  } catch (err) {
+    handleError(err);
+  }
+};
+
+// ================= RESET PASSWORD =================
+export const resetPassword = async (token, password) => {
+  try {
+    const res = await api.post(`/auth/reset-password/${token}`, {
+      password,
+    });
     return res.data.data;
   } catch (err) {
     handleError(err);
