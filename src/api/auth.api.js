@@ -1,7 +1,6 @@
 import api from "./axios";
 
 const handleError = (err) => {
-  // ✅ Backend se jo bhi message aaye woh throw karo
   const message =
     err?.response?.data?.message || err.message || "Something went wrong";
   throw new Error(message);
@@ -45,6 +44,22 @@ export const updateProfile = async (formData) => {
         "Content-Type": "multipart/form-data",
       },
     });
+    return res.data.data;
+  } catch (err) {
+    handleError(err);
+  }
+};
+
+// GOOGLE LOGIN
+export const googleLogin = async (idToken) => {
+  try {
+    const res = await api.post(
+      "/auth/google",
+      { idToken },
+      {
+        withCredentials: true, 
+      }
+    );
     return res.data.data;
   } catch (err) {
     handleError(err);
