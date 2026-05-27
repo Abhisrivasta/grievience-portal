@@ -8,9 +8,6 @@ export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  // ✅ FIX 3: updateUser — fresh server data always wins over stale prev
-  // spread order: prev first, then userData overwrites, then location merged
-  // This was structurally correct before but initAuth was bypassing it (see below)
   const updateUser = (userData) => {
     if (!userData) return;
 
@@ -30,6 +27,7 @@ export const AuthProvider = ({ children }) => {
 
   const login = (data) => {
     localStorage.setItem("token", data.token);
+    // data.user already is the formatUser shape from backend
     updateUser(data.user);
   };
 
@@ -44,7 +42,6 @@ export const AuthProvider = ({ children }) => {
       const token = localStorage.getItem("token");
       const savedUser = localStorage.getItem("user");
 
-      // No token — restore from localStorage as offline fallback only
       if (!token) {
         if (savedUser && savedUser !== "undefined" && savedUser !== "null") {
           try {
@@ -57,7 +54,7 @@ export const AuthProvider = ({ children }) => {
         return;
       }
 
-      // Has token — restore from localStorage first for fast initial render
+      // Fast initial render from localStorage
       if (savedUser && savedUser !== "undefined" && savedUser !== "null") {
         try {
           setUser(JSON.parse(savedUser));
@@ -67,12 +64,11 @@ export const AuthProvider = ({ children }) => {
       }
 
       try {
-        // ✅ FIX 3: Always replace with fresh server data — never merge with stale localStorage
-        // Previously, updateUser(userData) was called here which merged prev (stale localStorage)
-        // into server response. On second save this caused old profilePhoto/name to reappear.
-        const userData = await getProfile();
-        setUser(userData);
-        localStorage.setItem("user", JSON.stringify(userData));
+        const res = await getProfile();
+        // so extract res.user — same shape as updateProfile response
+        const freshUser = res?.user || res;
+        setUser(freshUser);
+        localStorage.setItem("user", JSON.stringify(freshUser));
       } catch (err) {
         console.error("Token verification failed:", err);
         logout();
@@ -86,14 +82,7 @@ export const AuthProvider = ({ children }) => {
 
   return (
     <AuthContext.Provider
-      value={{
-        user,
-        setUser,
-        updateUser,
-        login,
-        logout,
-        loading,
-      }}
+      value={{ user, setUser, updateUser, login, logout, loading }}
     >
       {children}
     </AuthContext.Provider>

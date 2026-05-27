@@ -7,26 +7,33 @@ import {
 import MainLayout from "../components/layout/MainLayout";
 import { updateProfile } from "../api/auth.api";
 
-const BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
-
 function Profile() {
   const { user, updateUser, loading } = useAuth();
   const [isEditing, setIsEditing] = useState(false);
   const [updating, setUpdating] = useState(false);
   const [error, setError] = useState(null);
 
-  // Form States
   const [name, setName] = useState(user?.name || "");
   const [city, setCity] = useState(user?.location?.city || "");
   const [state, setState] = useState(user?.location?.state || "");
   const [ward, setWard] = useState(user?.location?.ward || "");
   const [photoPreview, setPhotoPreview] = useState(null);
   const [selectedFile, setSelectedFile] = useState(null);
-
-  // ✅ FIX 1: photoTimestamp state — only updates on save, forcing img src change
   const [photoTimestamp, setPhotoTimestamp] = useState(Date.now());
 
   const fileInputRef = useRef(null);
+
+  if (loading)
+    return (
+      <MainLayout>
+        <div className="flex flex-col items-center justify-center h-[60vh] text-slate-400 gap-3">
+          <Loader2 className="animate-spin" size={40} />
+          <p className="font-bold tracking-widest text-xs uppercase">Syncing Profile...</p>
+        </div>
+      </MainLayout>
+    );
+
+  if (!user) return null;
 
   const getInitials = (n) =>
     n?.split(" ").map((i) => i[0]).join("").toUpperCase().slice(0, 2) || "U";
@@ -40,7 +47,6 @@ function Profile() {
   };
 
   const handleEdit = () => {
-    // ✅ FIX 2: Sync form state from latest user when entering edit mode
     setName(user?.name || "");
     setCity(user?.location?.city || "");
     setState(user?.location?.state || "");
@@ -78,18 +84,17 @@ function Profile() {
     formData.append("ward", ward.trim());
 
     if (selectedFile) {
+      // ✅ FIX 1: Matches backend route — upload.single("profilePhoto")
       formData.append("profilePhoto", selectedFile);
     }
 
     try {
       const res = await updateProfile(formData);
+      // ✅ FIX 2: auth.api.js does res.data.data already
+      // Backend sends { user: {...} } so res IS { user: {...} }
+      updateUser(res?.user || res);
 
-      // ✅ FIX 3: updateUser with fresh server response
-      updateUser(res.user || res);
-
-      // ✅ FIX 1: Update timestamp AFTER save so profile img URL changes
       setPhotoTimestamp(Date.now());
-
       setIsEditing(false);
       setPhotoPreview(null);
       setSelectedFile(null);
@@ -101,31 +106,15 @@ function Profile() {
     }
   };
 
-  if (loading)
-    return (
-      <MainLayout>
-        <div className="flex flex-col items-center justify-center h-[60vh] text-slate-400 gap-3">
-          <Loader2 className="animate-spin" size={40} />
-          <p className="font-bold tracking-widest text-xs uppercase">
-            Syncing Profile...
-          </p>
-        </div>
-      </MainLayout>
-    );
-
   return (
     <MainLayout>
       <div className="max-w-5xl mx-auto p-4 md:p-8 space-y-8 animate-in fade-in duration-700">
 
-        {/* Error Banner */}
         {error && (
           <div className="flex items-center gap-3 bg-red-50 border border-red-200 text-red-700 px-5 py-4 rounded-2xl text-sm font-semibold">
             <AlertCircle size={18} className="shrink-0" />
             {error}
-            <button
-              onClick={() => setError(null)}
-              className="ml-auto text-red-400 hover:text-red-600"
-            >
+            <button onClick={() => setError(null)} className="ml-auto text-red-400 hover:text-red-600">
               <X size={16} />
             </button>
           </div>
@@ -143,15 +132,11 @@ function Profile() {
               <div className="h-32 w-32 rounded-[2rem] bg-gradient-to-br from-indigo-500 to-purple-600 p-1 shadow-2xl">
                 <div className="h-full w-full rounded-[1.8rem] bg-slate-800 flex items-center justify-center text-4xl font-black overflow-hidden border-4 border-slate-900">
                   {photoPreview ? (
-                    <img
-                      src={photoPreview}
-                      className="h-full w-full object-cover"
-                      alt="Preview"
-                    />
+                    <img src={photoPreview} className="h-full w-full object-cover" alt="Preview" />
                   ) : user?.profilePhoto ? (
                     <img
-                      // ✅ FIX 1: Use photoTimestamp state, not Date.now() inline
-                      src={`${BASE_URL}${user.profilePhoto}?t=${photoTimestamp}`}
+                      // ✅ Cloudinary full URL — no BASE_URL needed
+                      src={`${user.profilePhoto}?t=${photoTimestamp}`}
                       className="h-full w-full object-cover"
                       alt="Profile"
                       onError={(e) => { e.target.style.display = "none"; }}
@@ -194,9 +179,7 @@ function Profile() {
                   maxLength={50}
                 />
               ) : (
-                <h2 className="text-4xl font-black tracking-tight">
-                  {user?.name}
-                </h2>
+                <h2 className="text-4xl font-black tracking-tight">{user?.name}</h2>
               )}
 
               <div className="flex items-center justify-center md:justify-start gap-4 text-slate-400 font-medium">
@@ -218,11 +201,7 @@ function Profile() {
                     disabled={updating}
                     className="flex items-center gap-2 px-6 py-3 bg-white text-slate-900 rounded-2xl font-bold hover:bg-indigo-50 transition-all shadow-lg text-sm disabled:opacity-60"
                   >
-                    {updating ? (
-                      <Loader2 className="animate-spin" size={18} />
-                    ) : (
-                      <Save size={18} />
-                    )}{" "}
+                    {updating ? <Loader2 className="animate-spin" size={18} /> : <Save size={18} />}
                     {updating ? "Saving..." : "Save"}
                   </button>
                   <button
@@ -234,7 +213,6 @@ function Profile() {
                   </button>
                 </>
               ) : (
-                // ✅ FIX 2: Call handleEdit (syncs form state) instead of setIsEditing directly
                 <button
                   onClick={handleEdit}
                   className="flex items-center gap-2 px-6 py-3 bg-indigo-600 text-white rounded-2xl font-bold hover:bg-indigo-700 transition-all shadow-xl shadow-indigo-500/20 text-sm"
@@ -249,7 +227,6 @@ function Profile() {
         {/* DETAILS & STATS */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
 
-          {/* ADDRESS FORM */}
           <div className="lg:col-span-2 bg-white rounded-[2.5rem] p-8 md:p-10 border border-slate-200 shadow-sm space-y-8">
             <h3 className="text-xl font-black text-slate-800 flex items-center gap-3">
               <MapPin className="text-indigo-600" /> Residency Details
@@ -276,30 +253,21 @@ function Profile() {
             </div>
           </div>
 
-          {/* SYSTEM INFO PANEL */}
           <div className="space-y-6">
             <div className="bg-slate-50 border border-slate-200 rounded-[2.5rem] p-8 space-y-6">
-              <h3 className="text-xs font-black text-slate-400 uppercase tracking-widest">
-                Account Insight
-              </h3>
+              <h3 className="text-xs font-black text-slate-400 uppercase tracking-widest">Account Insight</h3>
               <div className="space-y-4">
                 <div className="flex items-center justify-between p-4 bg-white rounded-2xl border border-slate-100">
                   <div className="flex items-center gap-3">
-                    <div className="p-2 bg-green-50 text-green-600 rounded-lg">
-                      <ShieldCheck size={20} />
-                    </div>
+                    <div className="p-2 bg-green-50 text-green-600 rounded-lg"><ShieldCheck size={20} /></div>
                     <p className="text-sm font-bold text-slate-700">Status</p>
                   </div>
-                  <span className="text-xs font-black text-green-600 uppercase">
-                    Verified
-                  </span>
+                  <span className="text-xs font-black text-green-600 uppercase">Verified</span>
                 </div>
 
                 <div className="flex items-center justify-between p-4 bg-white rounded-2xl border border-slate-100">
                   <div className="flex items-center gap-3">
-                    <div className="p-2 bg-indigo-50 text-indigo-600 rounded-lg">
-                      <Calendar size={20} />
-                    </div>
+                    <div className="p-2 bg-indigo-50 text-indigo-600 rounded-lg"><Calendar size={20} /></div>
                     <p className="text-sm font-bold text-slate-700">Joined</p>
                   </div>
                   <span className="text-xs font-bold text-slate-500">
@@ -310,12 +278,8 @@ function Profile() {
             </div>
 
             <div className="bg-indigo-600 rounded-[2rem] p-6 text-white text-center shadow-xl shadow-indigo-100">
-              <p className="text-[10px] font-black uppercase tracking-widest opacity-80 mb-1">
-                Citizen Power
-              </p>
-              <h4 className="text-lg font-bold">
-                Help your city grow by reporting issues.
-              </h4>
+              <p className="text-[10px] font-black uppercase tracking-widest opacity-80 mb-1">Citizen Power</p>
+              <h4 className="text-lg font-bold">Help your city grow by reporting issues.</h4>
             </div>
           </div>
         </div>

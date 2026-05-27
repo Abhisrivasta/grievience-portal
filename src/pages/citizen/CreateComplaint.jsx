@@ -14,13 +14,11 @@ import markerIcon2x from 'leaflet/dist/images/marker-icon-2x.png';
 import markerIcon from 'leaflet/dist/images/marker-icon.png';
 import markerShadow from 'leaflet/dist/images/marker-shadow.png';
 
-const BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:5000";
-
 delete L.Icon.Default.prototype._getIconUrl;
 L.Icon.Default.mergeOptions({
-    iconUrl: markerIcon,
-    iconRetinaUrl: markerIcon2x,
-    shadowUrl: markerShadow,
+  iconUrl: markerIcon,
+  iconRetinaUrl: markerIcon2x,
+  shadowUrl: markerShadow,
 });
 
 function MapLogic({ coords, setCoords, onLocationChange }) {
@@ -43,8 +41,7 @@ function CreateComplaint() {
   const fileInputRef = useRef(null);
   const { id } = useParams();
   const isEdit = !!id;
-  
-  // 1. Unified Form State
+
   const [form, setForm] = useState({ title: "", description: "", category: "", area: "" });
   const [image, setImage] = useState(null);
   const [preview, setPreview] = useState(null);
@@ -89,7 +86,6 @@ function CreateComplaint() {
     );
   };
 
-
   useEffect(() => {
     if (isEdit && id) {
       const loadComplaint = async () => {
@@ -100,10 +96,11 @@ function CreateComplaint() {
             title: data.title,
             description: data.description,
             category: data.category,
-            area: data.location.area
+            area: data.location.area,
           });
           setCoords({ lat: data.location.latitude, lng: data.location.longitude });
-          if (data.image) setPreview(`${BASE_URL}/${data.image.replace(/\\/g, "/")}`);
+          // ✅ FIX 3: Cloudinary gives full URL — no BASE_URL prefix needed
+          if (data.image) setPreview(data.image);
         } catch (err) {
           setError("Failed to load complaint data");
         }
@@ -112,9 +109,11 @@ function CreateComplaint() {
     }
   }, [isEdit, id]);
 
- const handleSubmit = async (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
+    setError("");
+
     const formData = new FormData();
     formData.append("title", form.title);
     formData.append("description", form.description);
@@ -124,7 +123,7 @@ function CreateComplaint() {
     formData.append("longitude", coords.lng);
     if (image) formData.append("image", image);
 
-  try {
+    try {
       if (isEdit) {
         await updateComplaint(id, formData);
       } else {
@@ -137,39 +136,41 @@ function CreateComplaint() {
       setLoading(false);
     }
   };
+
   return (
     <MainLayout>
       <div className="max-w-7xl mx-auto p-4 md:p-8 space-y-6 animate-in fade-in duration-700">
-        
+
         {/* HEADER */}
         <div className="flex items-center gap-4 border-b border-slate-200 pb-6">
           <button onClick={() => navigate(-1)} className="p-2.5 bg-white border border-slate-200 rounded-xl hover:bg-slate-50 transition-all shadow-sm">
             <ArrowLeft size={18} className="text-slate-600" />
           </button>
           <div>
-<h1 className="text-2xl font-black">{isEdit ? "Update Grievance" : "Register New Grievance"}</h1>            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-0.5 tracking-[0.2em]">Official Submission Portal</p>
+            <h1 className="text-2xl font-black">{isEdit ? "Update Grievance" : "Register New Grievance"}</h1>
+            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-0.5 tracking-[0.2em]">Official Submission Portal</p>
           </div>
         </div>
 
         <form onSubmit={handleSubmit} className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-          
+
           {/* LEFT: FORM DETAILS */}
           <div className="lg:col-span-7 bg-white rounded-[2.5rem] p-6 md:p-10 border border-slate-200 shadow-xl shadow-slate-200/40 space-y-8">
-            
+
             {error && (
               <div className="bg-rose-50 text-rose-600 p-4 rounded-2xl text-xs font-bold border border-rose-100 flex items-center gap-2 italic">
                 <AlertCircle size={16} /> {error}
               </div>
             )}
 
-            {/* IMAGE UPLOAD SECTION */}
+            {/* IMAGE UPLOAD */}
             <div className="space-y-3">
               <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 flex items-center gap-2">
                 <Camera size={14} className="text-indigo-500" /> Photo Evidence (Optional)
               </label>
-              
+
               {!preview ? (
-                <div 
+                <div
                   onClick={() => fileInputRef.current.click()}
                   className="group border-2 border-dashed border-slate-200 rounded-[2rem] p-10 flex flex-col items-center justify-center gap-3 hover:border-indigo-400 hover:bg-indigo-50/30 transition-all cursor-pointer bg-slate-50/50"
                 >
@@ -184,7 +185,7 @@ function CreateComplaint() {
               ) : (
                 <div className="relative rounded-[2rem] overflow-hidden border-4 border-white shadow-2xl h-64 w-full group">
                   <img src={preview} alt="preview" className="w-full h-full object-cover" />
-                  <button 
+                  <button
                     type="button"
                     onClick={() => { setImage(null); setPreview(null); }}
                     className="absolute top-4 right-4 p-2.5 bg-rose-500 text-white rounded-2xl shadow-lg hover:bg-rose-600 transition-all scale-90 group-hover:scale-100"
@@ -198,13 +199,17 @@ function CreateComplaint() {
 
             <div className="space-y-6">
               <div className="space-y-2">
-                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 flex items-center gap-2"><Type size={14} className="text-indigo-500" /> Subject</label>
+                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 flex items-center gap-2">
+                  <Type size={14} className="text-indigo-500" /> Subject
+                </label>
                 <input name="title" value={form.title} onChange={handleChange} className="w-full px-5 py-4 bg-slate-50 border border-slate-100 rounded-2xl text-sm focus:bg-white focus:border-indigo-500 outline-none font-bold text-slate-700 transition-all" placeholder="What is the issue?" required />
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-2">
-                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 flex items-center gap-2"><Tag size={14} className="text-indigo-500" /> Category</label>
+                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 flex items-center gap-2">
+                    <Tag size={14} className="text-indigo-500" /> Category
+                  </label>
                   <select name="category" value={form.category} onChange={handleChange} className="w-full px-5 py-4 bg-slate-50 border border-slate-100 rounded-2xl text-sm outline-none font-bold text-slate-700 cursor-pointer appearance-none" required>
                     <option value="">Select Category</option>
                     <option value="Road">Road & Infrastructure</option>
@@ -214,19 +219,23 @@ function CreateComplaint() {
                   </select>
                 </div>
                 <div className="space-y-2">
-                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 flex items-center gap-2"><MapPin size={14} className="text-indigo-500" /> Area Details</label>
+                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 flex items-center gap-2">
+                    <MapPin size={14} className="text-indigo-500" /> Area Details
+                  </label>
                   <input name="area" value={form.area} onChange={handleChange} className="w-full px-5 py-4 bg-slate-50 border border-slate-100 rounded-2xl text-sm outline-none focus:bg-white focus:border-indigo-500 font-bold text-slate-700 transition-all" placeholder="Auto-detect or type..." required />
                 </div>
               </div>
 
               <div className="space-y-2">
-                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 flex items-center gap-2"><FileText size={14} className="text-indigo-500" /> Full Description</label>
+                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 flex items-center gap-2">
+                  <FileText size={14} className="text-indigo-500" /> Full Description
+                </label>
                 <textarea name="description" rows={4} value={form.description} onChange={handleChange} className="w-full p-5 bg-slate-50 border border-slate-100 rounded-3xl text-sm outline-none focus:bg-white transition-all resize-none font-medium text-slate-600 leading-relaxed shadow-inner" placeholder="Detailed info..." required />
               </div>
             </div>
 
             <button type="submit" disabled={loading} className="w-full bg-[#0f172a] hover:bg-indigo-600 text-white py-5 rounded-2xl font-black tracking-[0.2em] uppercase text-[11px] transition-all flex justify-center items-center gap-3 shadow-xl active:scale-95">
-              {loading ? <Loader2 className="animate-spin" /> : <>Register Complaint <Send size={16} /></>}
+              {loading ? <Loader2 className="animate-spin" /> : <>{isEdit ? "Update Complaint" : "Register Complaint"} <Send size={16} /></>}
             </button>
           </div>
 
