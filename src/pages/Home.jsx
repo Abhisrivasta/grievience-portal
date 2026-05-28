@@ -1,7 +1,20 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { getHomePage } from "../api/home.api";
 import MainLayout from "../components/layout/MainLayout";
+
+const parseStatValue = (value) => {
+  const raw = String(value || "0");
+  const number = Number(raw.replace(/[^0-9]/g, "")) || 0;
+  const suffix = raw.replace(/[0-9,\s]/g, "") || "+";
+
+  return { number, suffix };
+};
+
+const formatStatSuffix = (suffix) => {
+  if (!suffix || suffix === "+") return "+";
+  return ` ${suffix}`;
+};
 
 export default function Home() {
   const [data, setData] = useState({
@@ -17,6 +30,20 @@ export default function Home() {
   const [loading, setLoading] = useState(true);
   const [counts, setCounts] = useState([]);
 
+  const normalizedStats = useMemo(() => {
+    return (
+      data.stats?.map((stat) => {
+        const parsed = parseStatValue(stat.value);
+
+        return {
+          ...stat,
+          target: parsed.number,
+          suffix: parsed.suffix,
+        };
+      }) || []
+    );
+  }, [data.stats]);
+
   useEffect(() => {
     const fetchHome = async () => {
       try {
@@ -24,7 +51,6 @@ export default function Home() {
 
         if (res?.data) {
           setData(res.data);
-          setCounts(res.data.stats?.map(() => 0) || []);
         }
       } finally {
         setLoading(false);
@@ -35,13 +61,17 @@ export default function Home() {
   }, []);
 
   useEffect(() => {
-    if (!data.stats?.length) return;
+    if (!normalizedStats.length) {
+      setCounts([]);
+      return;
+    }
+
+    setCounts(normalizedStats.map(() => 0));
 
     const interval = setInterval(() => {
       setCounts((prev) =>
         prev.map((count, index) => {
-          const rawValue = data.stats[index]?.value || "0";
-          const target = Number(String(rawValue).replace(/[^0-9]/g, "")) || 0;
+          const target = normalizedStats[index]?.target || 0;
           const step = Math.max(1, Math.ceil(target / 40));
 
           return Math.min(count + step, target);
@@ -50,7 +80,7 @@ export default function Home() {
     }, 40);
 
     return () => clearInterval(interval);
-  }, [data.stats]);
+  }, [normalizedStats]);
 
   return (
     <MainLayout isPublic={true}>
@@ -129,7 +159,7 @@ export default function Home() {
 
         {loading ? (
           <div className="relative z-10 flex min-h-screen items-center justify-center">
-            <div className="h-12 w-12 rounded-full border-4 border-white/20 border-t-cyan-400 animate-spin" />
+            <div className="h-12 w-12 animate-spin rounded-full border-4 border-white/20 border-t-cyan-400" />
           </div>
         ) : (
           <>
@@ -173,15 +203,17 @@ export default function Home() {
                     <h2 className="text-3xl font-bold md:text-4xl">
                       Powerful Features
                     </h2>
+
                     <p className="mx-auto mt-3 max-w-xl text-slate-400">
-                      Everything needed to manage complaints with clarity and speed.
+                      Everything needed to manage complaints with clarity and
+                      speed.
                     </p>
                   </div>
 
                   <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
                     {data.features.map((feature, index) => (
                       <div
-                        key={feature.id || index}
+                        key={feature.id || feature._id || index}
                         className="group animate-fade-up rounded-2xl border border-white/10 bg-white/[0.07] p-6 text-center shadow-2xl shadow-black/20 backdrop-blur-xl transition duration-300 hover:-translate-y-2 hover:border-cyan-300/40 hover:bg-white/[0.12]"
                         style={{ animationDelay: `${index * 120}ms` }}
                       >
@@ -203,22 +235,23 @@ export default function Home() {
               </section>
             )}
 
-            {data.stats?.length > 0 && (
+            {normalizedStats.length > 0 && (
               <section className="relative z-10 px-6 py-20">
                 <div className="mx-auto max-w-6xl">
                   <div className="mb-10 text-center">
                     <h2 className="text-3xl font-bold text-white md:text-4xl">
                       Our Impact
                     </h2>
+
                     <p className="mt-3 text-sm text-slate-400 md:text-base">
                       Numbers that show trust, speed and transparency.
                     </p>
                   </div>
 
                   <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
-                    {data.stats.map((stat, index) => (
+                    {normalizedStats.map((stat, index) => (
                       <div
-                        key={stat.id || index}
+                        key={stat.id || stat._id || index}
                         className="group relative animate-fade-up overflow-hidden rounded-2xl border border-white/10 bg-white/[0.08] p-7 text-center shadow-xl shadow-black/20 backdrop-blur-xl transition-all duration-300 hover:-translate-y-2 hover:border-cyan-300/40 hover:bg-white/[0.12]"
                         style={{ animationDelay: `${index * 120}ms` }}
                       >
@@ -231,7 +264,8 @@ export default function Home() {
                         </div>
 
                         <h3 className="bg-gradient-to-r from-cyan-300 to-blue-400 bg-clip-text text-4xl font-extrabold text-transparent md:text-5xl">
-                          {(counts[index] || 0).toLocaleString("en-IN")}+
+                          {(counts[index] || 0).toLocaleString("en-IN")}
+                          {formatStatSuffix(stat.suffix)}
                         </h3>
 
                         <p className="mt-3 text-sm font-medium leading-6 text-slate-300 md:text-base">
