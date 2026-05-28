@@ -1,101 +1,155 @@
-import { useState } from "react";
+import { lazy, Suspense, useState } from "react";
 import { Link } from "react-router-dom";
-import Sidebar from "./Sidebar";
-import Navbar from "./Navbar";
 import { useAuth } from "../../contexts/AuthContext";
 import { ShieldCheck, Mail, Info, Phone, Globe, Lock } from "lucide-react";
+
+const Sidebar = lazy(() => import("./Sidebar"));
+const Navbar = lazy(() => import("./Navbar"));
 
 function MainLayout({ children, isPublic = false }) {
   const [collapsed, setCollapsed] = useState(false);
   const { user } = useAuth();
 
-  // Sidebar/Navbar sirf dashboards ke liye
   const showDashboardUI = !isPublic && user;
 
   return (
-    <div className="min-h-screen bg-slate-50 flex flex-col">
+    <div className="flex min-h-screen flex-col bg-slate-50">
       <div className="flex flex-1 overflow-x-hidden">
-        
-        {/* Sidebar sirf dashboards par */}
         {showDashboardUI && (
-          <Sidebar collapsed={collapsed} setCollapsed={setCollapsed} />
+          <Suspense fallback={null}>
+            <Sidebar collapsed={collapsed} setCollapsed={setCollapsed} />
+          </Suspense>
         )}
 
-        <div className={`flex-1 flex flex-col min-h-screen transition-all duration-300 
-          ${showDashboardUI ? (collapsed ? "ml-20" : "ml-64") : "ml-0"}`}>
-          
-          {/* Navbar sirf dashboards par */}
-          {showDashboardUI && <Navbar />}
+        <div
+          className={`flex min-h-screen flex-1 flex-col transition-all duration-300 ${
+            showDashboardUI ? (collapsed ? "ml-20" : "ml-64") : "ml-0"
+          }`}
+        >
+          {showDashboardUI && (
+            <Suspense fallback={null}>
+              <Navbar />
+            </Suspense>
+          )}
 
-          {/* Page Content */}
           <main className={`flex-1 ${isPublic ? "" : "p-4 md:p-10"}`}>
-            <div className={`${isPublic ? "" : "max-w-7xl mx-auto"} min-h-[calc(100vh-400px)]`}>
+            <div
+              className={`${
+                isPublic ? "" : "mx-auto max-w-7xl"
+              } min-h-[calc(100vh-400px)]`}
+            >
               {children}
             </div>
           </main>
 
-          {/* Premium Footer (Visible Everywhere) */}
-          <footer className="bg-[#0f172a] text-slate-400 pt-16 pb-8 px-6 md:px-12 border-t border-slate-800">
-            <div className="max-w-7xl mx-auto">
-              <div className="grid grid-cols-1 md:grid-cols-4 gap-12 mb-12">
-                
-                {/* Brand */}
+          <footer className="border-t border-slate-800 bg-[#0f172a] px-6 pb-8 pt-16 text-slate-400 md:px-12">
+            <div className="mx-auto max-w-7xl">
+              <div className="mb-12 grid grid-cols-1 gap-12 md:grid-cols-4">
                 <div className="space-y-4">
                   <div className="flex items-center gap-2 text-white">
                     <ShieldCheck className="text-indigo-500" size={24} />
-                    <span className="font-black uppercase tracking-tighter text-lg">Grievance.</span>
+                    <span className="text-lg font-black uppercase tracking-tighter">
+                      Grievance.
+                    </span>
                   </div>
-                  <p className="text-xs leading-relaxed font-medium opacity-70">
-                    Transparent digital governance and accountable grievance redressal mechanisms for all citizens.
+
+                  <p className="text-xs font-medium leading-relaxed opacity-70">
+                    Transparent digital governance and accountable grievance
+                    redressal mechanisms for all citizens.
                   </p>
                 </div>
 
-                {/* Quick Navigation */}
                 <div className="space-y-4">
-                  <h4 className="text-white font-black text-[10px] uppercase tracking-[0.2em]">Platform</h4>
+                  <h4 className="text-[10px] font-black uppercase tracking-[0.2em] text-white">
+                    Platform
+                  </h4>
+
                   <ul className="space-y-3 text-[11px] font-bold uppercase tracking-tight">
-                    <li><Link to="/" className="hover:text-indigo-400 transition-all">Home</Link></li>
+                    <li>
+                      <Link to="/" className="transition-all hover:text-indigo-400">
+                        Home
+                      </Link>
+                    </li>
+
                     {user ? (
-                      <li><Link to={`/${user.role}`} className="hover:text-indigo-400 transition-all">My Dashboard</Link></li>
+                      <li>
+                        <Link
+                          to={`/${user.role}`}
+                          className="transition-all hover:text-indigo-400"
+                        >
+                          My Dashboard
+                        </Link>
+                      </li>
                     ) : (
-                      <li><Link to="/login" className="hover:text-indigo-400 transition-all">Citizen Login</Link></li>
+                      <li>
+                        <Link
+                          to="/login"
+                          className="transition-all hover:text-indigo-400"
+                        >
+                          Citizen Login
+                        </Link>
+                      </li>
                     )}
                   </ul>
                 </div>
 
-                {/* Info */}
                 <div className="space-y-4">
-                  <h4 className="text-white font-black text-[10px] uppercase tracking-[0.2em]">Information</h4>
+                  <h4 className="text-[10px] font-black uppercase tracking-[0.2em] text-white">
+                    Information
+                  </h4>
+
                   <ul className="space-y-3 text-[11px] font-bold uppercase tracking-tight">
-                    <li><Link to="/about" className="hover:text-indigo-400 transition-all flex items-center gap-2"><Info size={14}/> About Us</Link></li>
-                    {/* Admin ko Contact link nahi dikhega */}
+                    <li>
+                      <Link
+                        to="/about"
+                        className="flex items-center gap-2 transition-all hover:text-indigo-400"
+                      >
+                        <Info size={14} /> About Us
+                      </Link>
+                    </li>
+
                     {user?.role !== "admin" && (
-                      <li><Link to="/contact" className="hover:text-indigo-400 transition-all flex items-center gap-2"><Mail size={14}/> Contact Support</Link></li>
+                      <li>
+                        <Link
+                          to="/contact"
+                          className="flex items-center gap-2 transition-all hover:text-indigo-400"
+                        >
+                          <Mail size={14} /> Contact Support
+                        </Link>
+                      </li>
                     )}
-                    <li className="opacity-50 flex items-center gap-2 text-slate-600"><Lock size={12}/> Privacy Policy</li>
+
+                    <li className="flex items-center gap-2 text-slate-600 opacity-50">
+                      <Lock size={12} /> Privacy Policy
+                    </li>
                   </ul>
                 </div>
 
-                {/* Emergency */}
                 <div className="space-y-4">
-                  <h4 className="text-white font-black text-[10px] uppercase tracking-[0.2em]">Emergency</h4>
-                  <div className="bg-slate-800/40 p-4 rounded-2xl border border-slate-700/50">
-                    <p className="text-[10px] font-black text-indigo-400 uppercase mb-1 tracking-widest">Helpline</p>
-                    <p className="text-sm font-black text-white flex items-center gap-2 leading-none">
+                  <h4 className="text-[10px] font-black uppercase tracking-[0.2em] text-white">
+                    Emergency
+                  </h4>
+
+                  <div className="rounded-2xl border border-slate-700/50 bg-slate-800/40 p-4">
+                    <p className="mb-1 text-[10px] font-black uppercase tracking-widest text-indigo-400">
+                      Helpline
+                    </p>
+
+                    <p className="flex items-center gap-2 text-sm font-black leading-none text-white">
                       <Phone size={14} /> 1800-111-222
                     </p>
                   </div>
                 </div>
-
               </div>
 
-              {/* Copyright */}
-              <div className="pt-8 border-t border-slate-800/50 flex flex-col md:flex-row justify-between items-center gap-4">
+              <div className="flex flex-col items-center justify-between gap-4 border-t border-slate-800/50 pt-8 md:flex-row">
                 <p className="text-[10px] font-bold uppercase tracking-[0.2em] opacity-50">
-                  © {new Date().getFullYear()} Smart Grievance • Digital India Initiative
+                  © {new Date().getFullYear()} Smart Grievance • Digital India
+                  Initiative
                 </p>
+
                 <div className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-slate-500">
-                   <Globe size={12} /> Unified Portal Bihar
+                  <Globe size={12} /> Unified Portal Bihar
                 </div>
               </div>
             </div>

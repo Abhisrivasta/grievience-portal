@@ -1,131 +1,119 @@
-/* eslint-disable no-unused-vars */
-import { useState, useRef, useEffect } from "react";
+import { useEffect, useRef, useState } from "react";
+import { Bell, Trash2 } from "lucide-react";
 import { useNotifications } from "../../contexts/NotificationContext";
-import { Trash2 } from "lucide-react";
 
 function NotificationBell() {
+  const [open, setOpen] = useState(false);
+  const dropdownRef = useRef(null);
+
   const {
     notifications,
     unreadCount,
+    refreshNotifications,
     readNotification,
-    deleteNotification, // ✅ ADD THIS IN CONTEXT
+    deleteNotification,
   } = useNotifications();
 
-  const [open, setOpen] = useState(false);
-  const containerRef = useRef(null);
+  useEffect(() => {
+    refreshNotifications();
+  }, []);
 
   useEffect(() => {
-    function handleClickOutside(e) {
-      if (containerRef.current && !containerRef.current.contains(e.target)) {
+    const handleClickOutside = (e) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
         setOpen(false);
       }
-    }
-    if (open) document.addEventListener("mousedown", handleClickOutside);
-    return () =>
-      document.removeEventListener("mousedown", handleClickOutside);
-  }, [open]);
+    };
 
-  const handleDelete = async (e, id) => {
-    e.stopPropagation(); // 🔥 IMPORTANT (prevent read click)
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
-    try {
-      await deleteNotification(id);
-    } catch (err) {
-      console.error("Delete failed");
+  const handleOpen = () => {
+    setOpen((prev) => !prev);
+  };
+
+  const handleRead = async (notification) => {
+    if (!notification?.isRead && !notification?.read) {
+      await readNotification(notification._id);
     }
   };
 
   return (
-    <div ref={containerRef} className="relative">
-      
-      {/* 🔔 BUTTON */}
+    <div ref={dropdownRef} className="relative">
       <button
-        onClick={() => setOpen((o) => !o)}
-        className="relative p-2 text-slate-600 hover:bg-slate-100 rounded-full transition-all active:scale-90"
+        type="button"
+        onClick={handleOpen}
+        className="relative flex h-11 w-11 items-center justify-center rounded-xl bg-slate-100 text-slate-600 transition hover:bg-indigo-50 hover:text-indigo-600"
       >
-        <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
-        </svg>
+        <Bell size={20} />
 
         {unreadCount > 0 && (
-          <span className="absolute top-1 right-1 flex h-4 w-4">
-            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
-            <span className="relative inline-flex rounded-full h-4 w-4 bg-red-500 text-[10px] text-white font-bold items-center justify-center">
-              {unreadCount > 9 ? "9+" : unreadCount}
-            </span>
+          <span className="absolute -right-1 -top-1 flex h-5 min-w-5 items-center justify-center rounded-full bg-red-500 px-1.5 text-[10px] font-bold text-white">
+            {unreadCount > 99 ? "99+" : unreadCount}
           </span>
         )}
       </button>
 
-      {/* 🔔 DROPDOWN */}
       {open && (
-        <div className="absolute right-0 mt-3 w-80 bg-white border border-slate-200 rounded-2xl shadow-xl z-[100] overflow-hidden">
-
-          {/* HEADER */}
-          <div className="px-4 py-3 border-b border-slate-100 bg-slate-50 flex justify-between items-center">
-            <h4 className="font-bold text-slate-800 text-sm">
+        <div className="absolute right-0 top-14 z-50 w-80 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-2xl">
+          <div className="flex items-center justify-between border-b border-slate-100 px-4 py-3">
+            <h3 className="text-sm font-bold text-slate-900">
               Notifications
-            </h4>
-            <span className="text-[10px] font-bold text-blue-600 bg-blue-50 px-2 py-0.5 rounded-full uppercase">
-              {unreadCount} New
+            </h3>
+            <span className="text-xs font-semibold text-slate-400">
+              {unreadCount} unread
             </span>
           </div>
 
-          {/* LIST */}
-          <div className="max-h-[350px] overflow-y-auto">
-            {notifications.length === 0 ? (
-              <div className="p-8 text-center">
-                <p className="text-sm text-slate-400">
-                  No notifications yet.
-                </p>
-              </div>
-            ) : (
-              notifications.map((n) => (
-                <div
-                  key={n._id}
-                  onClick={() => !n.isRead && readNotification(n._id)}
-                  className={`
-                    group px-4 py-3 border-b border-slate-50 cursor-pointer flex justify-between items-start gap-2
-                    ${n.isRead ? "bg-white opacity-70" : "bg-blue-50/50 hover:bg-blue-50"}
-                  `}
-                >
-                  <div className="flex gap-3 flex-1">
-                    {!n.isRead && (
-                      <div className="mt-1.5 h-2 w-2 rounded-full bg-blue-600 shrink-0"></div>
-                    )}
+          <div className="max-h-96 overflow-y-auto">
+            {notifications?.length > 0 ? (
+              notifications.map((notification) => {
+                const isUnread = !notification.isRead && !notification.read;
 
-                    <div>
-                      <p className={`text-sm ${n.isRead ? "text-slate-600" : "text-slate-900 font-medium"}`}>
-                        {n.message}
+                return (
+                  <div
+                    key={notification._id}
+                    onClick={() => handleRead(notification)}
+                    className={`group flex cursor-pointer gap-3 border-b border-slate-100 px-4 py-3 transition hover:bg-slate-50 ${
+                      isUnread ? "bg-indigo-50/60" : "bg-white"
+                    }`}
+                  >
+                    <span
+                      className={`mt-1 h-2 w-2 shrink-0 rounded-full ${
+                        isUnread ? "bg-indigo-500" : "bg-slate-300"
+                      }`}
+                    />
+
+                    <div className="min-w-0 flex-1">
+                      <p className="text-sm font-semibold text-slate-800">
+                        {notification.title || "Notification"}
                       </p>
 
-                      <p className="text-[10px] text-slate-400 mt-1">
-                        {new Date(n.createdAt).toLocaleString("en-IN", {
-                          month: "short",
-                          day: "numeric",
-                          hour: "2-digit",
-                          minute: "2-digit",
-                        })}
+                      <p className="mt-1 line-clamp-2 text-xs leading-5 text-slate-500">
+                        {notification.message || notification.body}
                       </p>
                     </div>
-                  </div>
 
-                  {/* 🗑 DELETE ICON */}
-                  <button
-                    onClick={(e) => handleDelete(e, n._id)}
-                    className="opacity-0 group-hover:opacity-100 transition text-red-400 hover:text-red-600"
-                  >
-                    <Trash2 size={16} />
-                  </button>
-                </div>
-              ))
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        deleteNotification(notification._id);
+                      }}
+                      className="opacity-0 transition group-hover:opacity-100"
+                    >
+                      <Trash2 size={15} className="text-slate-400 hover:text-red-500" />
+                    </button>
+                  </div>
+                );
+              })
+            ) : (
+              <div className="px-4 py-10 text-center text-sm text-slate-400">
+                No notifications yet
+              </div>
             )}
           </div>
-
-          {/* FOOTER */}
-          <button className="w-full py-2.5 text-xs font-bold text-slate-500 hover:text-blue-600 bg-slate-50 hover:bg-slate-100 uppercase">
-            View All Notifications
-          </button>
         </div>
       )}
     </div>
